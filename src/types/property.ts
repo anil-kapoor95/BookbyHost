@@ -109,7 +109,7 @@ export interface Property {
   featured?: boolean;
 }
 
-export type PropertySort = "recommended" | "price-asc" | "price-desc" | "rating";
+export type PropertySort = "recommended" | "price-asc" | "price-desc" | "rating" | "newest";
 
 export interface PropertyQuery {
   search?: string;

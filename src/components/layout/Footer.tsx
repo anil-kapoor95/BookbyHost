@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { footerNav, siteConfig } from "@/config/site";
 import { Logo } from "./Logo";
+import { SocialLinks } from "./SocialLinks";
 
 export function Footer() {
   return (
@@ -10,6 +11,7 @@ export function Footer() {
           <div className="max-w-xs">
             <Logo inverted />
             <p className="mt-3 text-small">{siteConfig.tagline}</p>
+            <SocialLinks tone="dark" className="mt-5" />
           </div>
           {footerNav.map((group) => (
             <nav key={group.title} aria-label={group.title}>
@@ -33,7 +35,6 @@ export function Footer() {
           <p>
             © <CopyrightYear /> {siteConfig.name}. All rights reserved.
           </p>
-          <p>Example listings use sample data</p>
         </div>
       </div>
     </footer>

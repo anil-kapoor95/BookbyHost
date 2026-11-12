@@ -343,4 +343,22 @@ export const signupApi = {
   /** Saves one payment method of the property (402: a Pro method without the plan, or no more gateways allowed). */
   savePaymentMethod: (fields: PaymentMethodRequest, token: string) =>
     apiRequest<PaymentMethodState>("pjActionSavePaymentMethod", { ...fields }, { token }),
+
+  /**
+   * Calendar sync of the property (Properties > iCal feeds): get, save (adds an Airbnb / Booking.com iCal link and
+   * imports it), sync (imports every link again) or remove (stops syncing a link).
+   */
+  calendarSync: (
+    token: string,
+    request: { op: "get" } | { op: "sync" } | { op: "save"; ical_url: string } | { op: "remove"; feed_id: number },
+  ) => apiRequest<CalendarSyncState>("pjActionCalendarSync", { ...request }, { token }),
 };
+
+/** Calendar links of the property and the link of its own calendar (to import into Airbnb). */
+export interface CalendarSyncState {
+  feeds: { id: number; url: string; provider: string }[];
+  /** This property's calendar (bookings made here): Airbnb > Availability > Connect calendars > Import calendar. */
+  export_url: string;
+  /** Result of the import (save / sync). */
+  import?: { status: "OK" | "ERR"; text: string };
+}

@@ -673,7 +673,18 @@ function Summary({
       {quote ? (
         <dl className="mt-4 border-t border-(--p-line) pt-3">
           {row(`${t("bf_price")} · ${quote.nights} ${unitLabel(quote.nights)}`, quote.amount)}
-          {quote.extra_price > 0 ? row(t("bf_extra_price"), quote.extra_price) : null}
+          {/* the extras total, with the chosen extras by name under it */}
+          {quote.extra_price > 0 ? (
+            <>
+              {row(t("bf_extra_price"), quote.extra_price)}
+              <p className="-mt-1 pb-1 text-[0.8125rem] text-(--p-muted)">
+                {setup.extras
+                  .filter((e) => (request.extras[e.id] ?? 0) > 0)
+                  .map((e) => ((request.extras[e.id] ?? 0) > 1 ? `${e.name} × ${request.extras[e.id]}` : e.name))
+                  .join(", ")}
+              </p>
+            </>
+          ) : null}
           {quote.discount_valid && quote.discount_amount > 0 ? row(quote.discount_name || t("front_discount"), quote.discount_amount, "minus") : null}
           {quote.promo_valid && quote.promo_amount > 0 ? row(`${t("book_coupon")} ${quote.promo_code}`, quote.promo_amount, "minus") : null}
           {quote.tax > 0 ? row(t("bf_tax"), quote.tax, "muted") : null}

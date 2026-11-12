@@ -1,5 +1,6 @@
 import { HomePage } from "@/components/marketing/HomePage";
 import { getPublicPlans } from "@/lib/api/plans";
+import { getPublicThemes } from "@/lib/api/themes";
 import { pageMetadata } from "@/lib/seo";
 
 const title = "StayOwned — your own direct booking website";
@@ -8,10 +9,10 @@ const description =
 
 export const metadata = { ...pageMetadata({ title, description, path: "/" }), title: { absolute: title } };
 
-// The pricing section shows the plans of the back office (fresh on each request).
+// The themes and pricing sections show the back office's themes and plans (fresh on each request).
 export const instant = false;
 
 export default async function Page() {
-  const plans = await getPublicPlans();
-  return <HomePage plans={plans} />;
+  const [plans, { themes, planNames }] = await Promise.all([getPublicPlans(), getPublicThemes()]);
+  return <HomePage plans={plans} themes={themes} themePlans={planNames} />;
 }

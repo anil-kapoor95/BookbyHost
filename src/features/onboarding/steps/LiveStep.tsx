@@ -17,6 +17,7 @@ import { LivePreviewCard } from "../components/LivePreviewCard";
 import { useAccountPrice } from "../use-account-price";
 import { PaymentGatewayDialog, type GatewaySaveResult } from "../components/PaymentGatewayDialog";
 import { UpgradePlansDialog } from "../components/UpgradePlansDialog";
+import { CalendarSyncDialog } from "../components/CalendarSyncDialog";
 import {
   GATEWAY_CONFIGS,
   emptyGatewaySettings,
@@ -67,6 +68,10 @@ export function LiveStep() {
   // Payment methods of the property as the back office sees them (order, free / Pro, locked, on / off).
   const [methods, setMethods] = useState<PaymentMethodState[] | null>(null);
   const [plansOpen, setPlansOpen] = useState(false);
+  // Calendar sync (Airbnb iCal links of the property); null until known
+  const [syncOpen, setSyncOpen] = useState(false);
+  const [calendarCount, setCalendarCount] = useState<number | null>(null);
+  const savedCalendars = calendarCount ?? state?.property?.ical_urls?.length ?? 0;
   const [gatewayLoadError, setGatewayLoadError] = useState<string | null>(null);
 
   // Fill the popups with what is already saved for the property (also after a reload / on another device).
@@ -200,11 +205,11 @@ export function LiveStep() {
                 <WhatsAppMark /> Share on WhatsApp
                 <span className="sr-only"> (opens in a new tab)</span>
               </Button>
-              <Button variant="onDark" size="lg" href={websiteHref ?? "/setup/preview"}>
+              <Button variant="onDark" size="lg" href={websiteHref ?? "/setup/preview"} external={Boolean(websiteHref)}>
                 <Icon name="externalLink" size={17} /> View my page
               </Button>
               {companyHref && hasProperty ? (
-                <Button variant="onDark" size="lg" href={companyHref}>
+                <Button variant="onDark" size="lg" href={companyHref} external>
                   <Icon name="home" size={17} /> Explore my stays
                 </Button>
               ) : null}
@@ -259,6 +264,7 @@ export function LiveStep() {
         />
       ))}
 
+      <CalendarSyncDialog open={syncOpen} onClose={() => setSyncOpen(false)} token={token} onChange={setCalendarCount} />
       <UpgradePlansDialog
         open={plansOpen}
         token={token}
@@ -361,9 +367,17 @@ export function LiveStep() {
                   </p>
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3 text-caption text-body">
-                      <span className="h-1.5 w-28 rounded-pill bg-primary-strong" aria-hidden="true" />
+                      <span className="h-1.5 w-28 overflow-hidden rounded-pill bg-surface-sunken" aria-hidden="true">
+                        <span className={cn("block h-full rounded-pill bg-primary-strong", savedCalendars > 0 ? "w-full" : "w-0")} />
+                      </span>
                       <span>
-                        <strong className="text-heading">1 of 1</strong> calendar included in your plan
+                        {savedCalendars > 0 ? (
+                          <>
+                            <strong className="text-heading">{savedCalendars}</strong> {savedCalendars === 1 ? "calendar" : "calendars"} connected
+                          </>
+                        ) : (
+                          "No calendar connected yet"
+                        )}
                       </span>
                     </div>
                     <Link
@@ -374,15 +388,8 @@ export function LiveStep() {
                     </Link>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setDemoMessage(
-                      "Calendar sync needs the StayOwned backend, which isn't part of this static demo. Nothing was synced.",
-                    )
-                  }
-                >
-                  <Icon name="calendar" size={16} /> Sync Calendar
+                <Button variant={savedCalendars > 0 ? "outline" : "primary"} onClick={() => setSyncOpen(true)} disabled={!hasProperty}>
+                  <Icon name={savedCalendars > 0 ? "refresh" : "calendar"} size={16} /> {savedCalendars > 0 ? "Manage sync" : "Sync Calendar"}
                 </Button>
               </div>
             </li>

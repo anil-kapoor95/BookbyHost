@@ -13,7 +13,7 @@ export const SORT_OPTIONS: { value: PropertySort; label: string }[] = [
   { value: "recommended", label: "Recommended" },
   { value: "price-asc", label: "Price: low to high" },
   { value: "price-desc", label: "Price: high to low" },
-  { value: "rating", label: "Top rated" },
+  { value: "newest", label: "Newest" },
 ];
 
 /** Pure filter/sort/paginate — shared by the mock repository and any client-side use. */

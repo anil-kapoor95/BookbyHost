@@ -1,19 +1,28 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { ThemePreview } from "@/components/theme/ThemePreview";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { THEMES } from "@/data/themes";
-import type { ApiPlan } from "@/lib/api/signup";
-import { formatPlanPrice, planCardLines, planCardStyle, planPeriodLabel } from "@/lib/plan-display";
+import type { ApiPlan, ApiTheme } from "@/lib/api/signup";
 import { cn } from "@/lib/utils";
+import { PlanGrid } from "./PricingPage";
+import { ThemeGalleryCard } from "./ThemesPage";
 import { FaqAccordion } from "./FaqAccordion";
 import { HOME_FAQS } from "./faq-data";
 import { CheckItem, CtaBanner, Eyebrow, SectionHeader } from "./ui";
 
 /** Home page from the Figma "Homepage" frame. Photos are the project's placeholder images. */
-export function HomePage({ plans = [] }: { plans?: ApiPlan[] }) {
+export function HomePage({
+  plans = [],
+  themes = [],
+  themePlans = "",
+}: {
+  plans?: ApiPlan[];
+  /** Colour themes of the back office (pjActionGetThemes). */
+  themes?: ApiTheme[];
+  /** Plans that unlock the paid themes. */
+  themePlans?: string;
+}) {
   return (
     <>
       <Hero />
@@ -22,7 +31,7 @@ export function HomePage({ plans = [] }: { plans?: ApiPlan[] }) {
       <BookingFlow />
       <FeatureCards />
       <AiAssistant />
-      <Themes />
+      <Themes themes={themes} planNames={themePlans} />
       <Pricing plans={plans} />
       <section aria-labelledby="home-faq-title" className="bg-primary-tint py-section">
         <div className="container-page">
@@ -643,7 +652,13 @@ function AiAssistant() {
 
 /* ------------------------------------------------------------ Themes */
 
-function Themes() {
+/** Themes shown on the home page: two rows of the desktop grid; the Themes page has them all. */
+const HOME_THEMES = 6;
+
+function Themes({ themes, planNames }: { themes: ApiTheme[]; planNames: string }) {
+  if (themes.length === 0) return null;
+  // the free theme first, then the others in the back office's order
+  const shown = [...themes].sort((a, b) => Number(Boolean(b.free)) - Number(Boolean(a.free))).slice(0, HOME_THEMES);
   return (
     <section aria-labelledby="themes-title" className="bg-primary-tint py-section">
       <div className="container-page">
@@ -657,39 +672,17 @@ function Themes() {
           <p className="text-small text-body">Start with a free theme. Switch any time.</p>
         </div>
         <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {THEMES.map((theme) => {
-            const free = theme.plan === "free";
-            return (
-              <li
-                key={theme.id}
-                className={cn(
-                  "rounded-card border bg-surface p-3 shadow-card",
-                  free ? "border-primary ring-1 ring-primary" : "border-border",
-                )}
-              >
-                <ThemePreview theme={theme} propertyName="Green Casa" place="Assagao, North Goa" />
-                <div className="mt-3 flex items-center justify-between gap-3 px-1 pb-1">
-                  <div className="min-w-0">
-                    <h3 className="flex items-center gap-2 font-heading text-small font-bold">
-                      {theme.name}
-                      <Badge variant={free ? "free" : "pro"}>{free ? "Free" : "Pro"}</Badge>
-                    </h3>
-                    <p className="truncate text-caption text-body">{theme.description}</p>
-                  </div>
-                  {free ? (
-                    <span className="rounded-sm bg-primary px-3 py-1.5 text-caption font-semibold text-on-primary">
-                      Free
-                    </span>
-                  ) : (
-                    <Button href="/themes" size="sm" variant="secondary">
-                      <Icon name="lock" size={13} /> Preview
-                    </Button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
+          {shown.map((theme) => (
+            <ThemeGalleryCard key={theme.id} theme={theme} planNames={planNames} />
+          ))}
         </ul>
+        {themes.length > shown.length ? (
+          <div className="mt-8 flex justify-center">
+            <Button href="/themes" variant="outline" size="lg" className="rounded-pill">
+              See all {themes.length} themes <Icon name="arrowRight" size={16} />
+            </Button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -697,26 +690,8 @@ function Themes() {
 
 /* ----------------------------------------------------------- Pricing */
 
-function Pricing({ plans: apiPlans }: { plans: ApiPlan[] }) {
-  // Plans from the back office (Subscriptions > Plans), shown like the Pricing page
-  const plans = apiPlans.map((plan, index) => {
-    const cta =
-      plan.price === null
-        ? { label: "Contact us", href: "/contact" }
-        : plan.price === 0
-          ? { label: "Start free", href: "/setup/account" }
-          : plan.trial_days > 0
-            ? { label: `Start ${plan.trial_days}-day free trial`, href: "/setup/account" }
-            : { label: `Get ${plan.name}`, href: "/setup/account" };
-    return {
-      name: plan.name,
-      price: formatPlanPrice(plan),
-      period: planPeriodLabel(plan),
-      features: planCardLines(plan, apiPlans.slice(0, index), 7),
-      cta,
-      style: planCardStyle(plan, apiPlans),
-    };
-  });
+/** The plans of the back office (Subscriptions > Plans), with the same cards as the Pricing page. */
+function Pricing({ plans }: { plans: ApiPlan[] }) {
   if (plans.length === 0) return null;
   return (
     <section aria-labelledby="pricing-title" className="container-page py-section">
@@ -726,59 +701,12 @@ function Pricing({ plans: apiPlans }: { plans: ApiPlan[] }) {
         title="Simple pricing"
         description="Start free. Upgrade when you want your own domain."
       />
-      <ul className={cn("mx-auto mt-12 grid max-w-5xl grid-cols-1 items-start gap-6", plans.length >= 3 ? "lg:grid-cols-3" : plans.length === 2 ? "md:grid-cols-2 max-w-3xl" : "max-w-sm")}>
-        {plans.map((plan) => {
-          const dark = plan.style === "dark";
-          return (
-            <li
-              key={plan.name}
-              className={cn(
-                "relative flex h-full flex-col rounded-card p-7",
-                plan.style === "plain" && "border border-border bg-surface",
-                plan.style === "popular" && "border-2 border-primary bg-surface shadow-panel",
-                dark && "bg-secondary-active text-on-dark",
-              )}
-            >
-              {plan.style === "popular" ? (
-                <span className="absolute -top-3 left-7 rounded-pill bg-primary px-3 py-1 text-micro font-bold uppercase text-on-primary">
-                  Most popular
-                </span>
-              ) : null}
-              <h3 className={cn("font-heading text-title", dark && "text-on-dark")}>{plan.name}</h3>
-              <p className="mt-2">
-                <span className={cn("font-heading text-display", dark ? "text-on-dark" : "text-heading")}>
-                  {plan.price}
-                </span>
-                {plan.period ? (
-                  <span className={cn("ml-1 text-small", dark ? "text-on-dark-muted" : "text-body")}>
-                    {plan.period}
-                  </span>
-                ) : null}
-              </p>
-              <ul className="mt-6 grid flex-1 gap-3">
-                {plan.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className={cn("flex items-start gap-2.5 text-small", dark ? "text-on-dark" : "text-heading")}
-                  >
-                    <Icon name="check" size={14} strokeWidth={2.5} className="mt-0.5 text-primary-on-dark" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                href={plan.cta.href}
-                size="lg"
-                fullWidth
-                variant={plan.style === "popular" ? "primary" : "outline"}
-                className="mt-8 rounded-pill"
-              >
-                {plan.cta.label}
-              </Button>
-            </li>
-          );
-        })}
-      </ul>
+      <PlanGrid plans={plans} />
+      <div className="mt-8 flex justify-center">
+        <Button href="/pricing" variant="outline" size="lg" className="rounded-pill">
+          Compare all plans <Icon name="arrowRight" size={16} />
+        </Button>
+      </div>
     </section>
   );
 }

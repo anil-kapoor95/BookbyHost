@@ -52,11 +52,11 @@ export function PricingPlanCard({
   return (
     <Tag
       className={cn(
-        "relative flex snap-start flex-col rounded-plan border-2",
+        // every card as tall as the tallest one in its row (the grid stretches them), button at the bottom
+        "relative flex h-full snap-start flex-col rounded-plan border-2",
         compact ? "px-6 py-8" : "px-[38px] py-11",
         style === "plain" && "border-border bg-surface",
         popular && "border-brand bg-surface shadow-plan-popular",
-        popular && !compact && "max-md:mt-3 md:-mt-3",
         dark && "border-secondary bg-secondary",
       )}
     >
@@ -69,7 +69,7 @@ export function PricingPlanCard({
       <h3 className={cn("font-heading text-[1.5rem] font-extrabold leading-[1.1] tracking-[-0.035em]", dark ? "text-white" : "text-heading")}>
         {name}
       </h3>
-      <p className={cn("flex flex-wrap items-baseline gap-1 pt-4", note ? "pb-1" : "pb-[26px]")}>
+      <p className="flex min-h-[4.75rem] flex-wrap items-baseline gap-1 pb-1 pt-4">
         <span
           className={cn(
             "font-display opsz-14",
@@ -81,20 +81,18 @@ export function PricingPlanCard({
         </span>
         {period ? <span className="font-heading text-[0.9375rem] font-medium text-body">{period}</span> : null}
       </p>
-      {note ? (
-        <p className={cn("pb-[22px] font-heading text-small font-semibold", dark ? "text-plan-text-on-dark" : "text-success")}>
-          {note}
-        </p>
-      ) : null}
+      {/* always the same space under the price, so the feature lists of all cards start on one line */}
+      <p className={cn("min-h-5 pb-[22px] font-heading text-small font-semibold", dark ? "text-plan-text-on-dark" : "text-success")}>
+        {note ?? <span aria-hidden="true">&nbsp;</span>}
+      </p>
 
-      <ul className={cn("flex flex-1 flex-col pb-9", style === "plain" ? "gap-3.5" : "gap-[13.5px]")}>
+      <ul className="flex flex-1 flex-col gap-3.5 pb-9">
         {features.map((feature) => (
           <li
             key={feature}
             className={cn(
               "flex items-center gap-3 font-heading text-[0.9375rem] font-semibold leading-6",
               dark ? "text-plan-text-on-dark" : "text-plan-text",
-              style === "plain" && !compact && "py-[12.6px]",
             )}
           >
             <PlanTickIcon onDark={dark} />

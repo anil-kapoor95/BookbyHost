@@ -11,6 +11,7 @@ import { AMENITIES, AMENITY_FEATURE_NAMES, amenityKey } from "@/data/amenities";
 import type { PropertyPageData } from "@/lib/api/property-page";
 import { formatAdminPrice } from "@/lib/price-format";
 import { cn } from "@/lib/utils";
+import { DEFAULT_SITE_LABELS } from "./default-labels";
 import { themeStyle } from "./theme";
 
 /* ------------------------------------------------------------------ theme */
@@ -66,7 +67,7 @@ export type Translate = (key: string, tokens?: Tokens) => string;
 /** Text of a label (System Options > Languages) with its {TOKENS} filled in; the key itself when it is missing. */
 function translator(labels: Record<string, string>): Translate {
   return (key, tokens) => {
-    let text = labels[key] ?? key;
+    let text = labels[key] ?? DEFAULT_SITE_LABELS[key] ?? key;
     for (const [name, value] of Object.entries(tokens ?? {})) text = text.split(`{${name}}`).join(String(value));
     return text;
   };
@@ -81,12 +82,15 @@ export function PropertyWebsite({
   page,
   basePath,
   companyHref,
+  demo = false,
 }: {
   page: PropertyPageData;
   /** Path of this property on the website: "/casanova", or "" when it is the home page of the host's own domain. */
   basePath: string;
   /** Page with all the host's properties ("/stays/<company>", "/" on the host's own domain), null: none. */
   companyHref: string | null;
+  /** Example page of the website: looks the same, but it can't be booked (the booking buttons are switched off). */
+  demo?: boolean;
 }) {
   const t = translator(page.labels);
   const perDay = page.price_based_on === "days";
@@ -183,7 +187,13 @@ export function PropertyWebsite({
             <a href="#location" className="hover:text-(--p-accent)">{t("site_nav_location")}</a>
             {page.faqs.length > 0 ? <a href="#faq" className="hover:text-(--p-accent)">{t("site_nav_faq")}</a> : null}
           </nav>
-          <button type="button" onClick={() => router.push(bookHref())} className={cn(accentButton, "h-10 shrink-0 text-[0.875rem]")}>{page.labels.book_now}</button>
+          <button
+            type="button"
+            onClick={() => (demo ? document.getElementById("book")?.scrollIntoView({ behavior: "smooth" }) : router.push(bookHref()))}
+            className={cn(accentButton, "h-10 shrink-0 text-[0.875rem]")}
+          >
+            {page.labels.book_now}
+          </button>
         </div>
       </header>
 
@@ -363,9 +373,18 @@ export function PropertyWebsite({
                 </p>
               ) : null}
 
-              <button type="button" onClick={() => router.push(bookHref())} disabled={rangeFree === false} className={cn(accentButton, "mt-4 h-12 w-full text-[1rem] disabled:cursor-not-allowed disabled:opacity-50")}>
+              <button
+                type="button"
+                onClick={() => router.push(bookHref())}
+                disabled={demo || rangeFree === false}
+                title={demo ? "Example page: it can't be booked" : undefined}
+                className={cn(accentButton, "mt-4 h-12 w-full text-[1rem] disabled:cursor-not-allowed disabled:opacity-50")}
+              >
                 {page.labels.book_now}
               </button>
+              {demo ? (
+                <p className="mt-2 text-center text-[0.75rem] text-white/70">This is an example page, so it can&apos;t be booked.</p>
+              ) : null}
               {whatsapp ? (
                 <a
                   href={`https://wa.me/${whatsapp}?text=${whatsappText}`}

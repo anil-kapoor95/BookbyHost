@@ -3,16 +3,9 @@ import { Icon, WhatsAppMark } from "@/components/ui/Icon";
 import { ContactUsForm } from "./ContactUsForm";
 import { FaqAccordion } from "./FaqAccordion";
 import { CONTACT_FAQS } from "./faq-data";
-import { MarketingIcon, type MarketingIconName } from "./icons";
+import { SocialLinks } from "@/components/layout/SocialLinks";
+import { MarketingIcon } from "./icons";
 import { CtaBanner, Eyebrow, SectionHeader, SUPPORT } from "./ui";
-
-const SOCIAL: { label: string; icon: MarketingIconName }[] = [
-  { label: "Instagram", icon: "instagram" },
-  { label: "Facebook", icon: "facebook" },
-  { label: "LinkedIn", icon: "linkedin" },
-  { label: "X", icon: "xLogo" },
-  { label: "YouTube", icon: "youtube" },
-];
 
 /** Contact page from the Figma "Contact Us" frame. */
 export function ContactPage() {
@@ -101,23 +94,16 @@ export function ContactPage() {
               </span>
             </a>
 
-            <div className="rounded-card bg-primary-soft p-5">
-              <p className="font-heading text-title">Follow us</p>
-              <p className="mt-1 text-caption text-body">Tips for hosts and new features.</p>
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {SOCIAL.map((item) => (
-                  <li key={item.label}>
-                    <span
-                      title={item.label}
-                      className="grid size-10 place-items-center rounded-input bg-surface text-heading shadow-card"
-                    >
-                      <MarketingIcon name={item.icon} size={18} />
-                      <span className="sr-only">{item.label}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* social links of the back office (System Options > Visual & Branding); hidden when none is set */}
+            <SocialLinks
+              className="rounded-card bg-primary-soft p-5"
+              title={
+                <div className="mb-4">
+                  <p className="font-heading text-title">Follow us</p>
+                  <p className="mt-1 text-caption text-body">Tips for hosts and new features.</p>
+                </div>
+              }
+            />
           </aside>
         </div>
       </section>

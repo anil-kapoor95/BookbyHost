@@ -1,10 +1,15 @@
 import { ThemesPage } from "@/components/marketing/ThemesPage";
+import { getPublicThemes } from "@/lib/api/themes";
 import { pageMetadata } from "@/lib/seo";
 
-const description = "Five designer looks for your booking page. Casa is free; Luxe, Homestay, Urban and Coastal come with Pro.";
+const description = "Colour themes for your booking page. Start with a free theme and switch any time.";
 
 export const metadata = pageMetadata({ title: "Themes", description, path: "/themes" });
 
-export default function Page() {
-  return <ThemesPage />;
+// The themes (and which plan unlocks them) come from the back office on each request.
+export const instant = false;
+
+export default async function Page() {
+  const { themes, planNames } = await getPublicThemes();
+  return <ThemesPage themes={themes} planNames={planNames} />;
 }

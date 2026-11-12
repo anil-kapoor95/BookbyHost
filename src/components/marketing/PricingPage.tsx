@@ -44,26 +44,31 @@ function Plans({ plans }: { plans: ApiPlan[] }) {
           title="Simple pricing"
           description="Start free. Upgrade when you want your own domain."
         />
-        {plans.length === 0 ? (
-          <p className="mx-auto mt-[67px] max-w-[560px] text-center text-body">
-            Plans are being updated. <Link href="/contact" className="font-semibold text-heading underline underline-offset-2">Contact us</Link> for prices.
-          </p>
-        ) : (
-          <ul
-            className={cn(
-              "mx-auto mt-[67px] grid max-w-[1112px] grid-cols-1 items-start gap-6",
-              plans.length === 2 && "md:grid-cols-2 md:max-w-[760px]",
-              plans.length >= 3 && "md:grid-cols-3",
-              plans.length === 1 && "max-w-[400px]",
-            )}
-          >
-            {plans.map((plan, index) => (
-              <PlanCard key={plan.id} plan={plan} plans={plans} index={index} />
-            ))}
-          </ul>
-        )}
+        <PlanGrid plans={plans} />
       </div>
     </section>
+  );
+}
+
+/** The plan cards of the back office (Subscriptions > Plans). Also used on the home page. */
+export function PlanGrid({ plans }: { plans: ApiPlan[] }) {
+  return plans.length === 0 ? (
+    <p className="mx-auto mt-[67px] max-w-[560px] text-center text-body">
+      Plans are being updated. <Link href="/contact" className="font-semibold text-heading underline underline-offset-2">Contact us</Link> for prices.
+    </p>
+  ) : (
+    <ul
+      className={cn(
+        "mx-auto mt-[67px] grid max-w-[1112px] grid-cols-1 items-stretch gap-6",
+        plans.length === 2 && "md:grid-cols-2 md:max-w-[760px]",
+        plans.length >= 3 && "md:grid-cols-3",
+        plans.length === 1 && "max-w-[400px]",
+      )}
+    >
+      {plans.map((plan, index) => (
+        <PlanCard key={plan.id} plan={plan} plans={plans} index={index} />
+      ))}
+    </ul>
   );
 }
 

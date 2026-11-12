@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { PropertyCard } from "@/components/property/PropertyCard";
+import { PropertyCard, StayCard } from "@/components/property/PropertyCard";
 import { Pagination } from "@/components/search/Pagination";
 import { PropertyFilters } from "@/components/search/PropertyFilters";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { PROPERTY_TYPE_LABELS } from "@/data/amenities";
+import { getDirectory } from "@/lib/api/directory";
 import { parsePropertyQuery } from "@/lib/properties/query";
 import { propertyRepository } from "@/lib/properties/repository";
 import { pageMetadata } from "@/lib/seo";
@@ -18,6 +19,10 @@ export const metadata = pageMetadata({
   path: "/properties",
 });
 
+// The hosts' properties come from the back office on each request.
+export const instant = false;
+
+
 export default function PropertiesPage({ searchParams }: PageProps<"/properties">) {
   return (
     <div className="container-page py-8 sm:py-10">
@@ -27,11 +32,11 @@ export default function PropertiesPage({ searchParams }: PageProps<"/properties"
           { label: "Properties", href: "/properties" },
         ]}
       />
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-display">Stays you can book directly</h1>
           <p className="mt-2 max-w-2xl text-lead text-body">
-            Every listing here is a host&apos;s own StayOwned page — book with them directly, with 0% commission.
+            Every stay here has its own booking page, run by its host. Book with them directly, with 0% commission.
           </p>
         </div>
         <Button href="/setup/account" variant="outline" className="self-start sm:self-auto">
@@ -47,9 +52,20 @@ export default function PropertiesPage({ searchParams }: PageProps<"/properties"
 
 async function Results({ searchParams }: { searchParams: PageProps<"/properties">["searchParams"] }) {
   const query = parsePropertyQuery(await searchParams);
-  const result = await propertyRepository.list(query);
-  const from = (result.page - 1) * result.pageSize + 1;
-  const to = from + result.items.length - 1;
+  const real = await getDirectory(query);
+  const filtered = Boolean(query.search || query.type || query.guests);
+  // The hosts' real stays when there are any; the example stays only while no host has published one yet
+  // (or when the stays can't be loaded).
+  const useExamples = real === null || (real.total === 0 && !filtered);
+  const examples = useExamples ? await propertyRepository.list(query) : null;
+
+  const total = examples ? examples.total : real!.total;
+  const page = examples ? examples.page : real!.page;
+  const perPage = examples ? examples.pageSize : real!.per_page;
+  const totalPages = examples ? examples.totalPages : real!.total_pages;
+  const count = examples ? examples.items.length : real!.items.length;
+  const from = (page - 1) * perPage + 1;
+  const to = from + count - 1;
 
   return (
     <>
@@ -58,20 +74,32 @@ async function Results({ searchParams }: { searchParams: PageProps<"/properties"
       </div>
       <h2 className="sr-only">Search results</h2>
       <p className="mt-6 text-small text-body" role="status">
-        {result.total === 0
+        {total === 0
           ? "No stays found"
-          : `Showing ${from}–${to} of ${result.total} ${result.total === 1 ? "stay" : "stays"}`}
+          : `Showing ${from}–${to} of ${total} ${examples ? (total === 1 ? "example stay" : "example stays") : total === 1 ? "stay" : "stays"}`}
         {query.type ? ` · ${PROPERTY_TYPE_LABELS[query.type]}` : ""}
         {query.search ? ` · “${query.search}”` : ""}
       </p>
+      {examples ? (
+        <p className="mt-2 flex items-center gap-2 text-small text-body">
+          <Icon name="info" size={15} className="shrink-0 text-primary-strong" />
+          These are example stays showing the StayOwned designs. Real stays appear here as soon as hosts publish their pages.
+        </p>
+      ) : null}
 
-      {result.items.length ? (
+      {count > 0 ? (
         <ul className="mt-4 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {result.items.map((property, index) => (
-            <li key={property.id}>
-              <PropertyCard property={property} priority={index < 3} />
-            </li>
-          ))}
+          {examples
+            ? examples.items.map((property, index) => (
+                <li key={property.id}>
+                  <PropertyCard property={property} priority={index < 3} />
+                </li>
+              ))
+            : real!.items.map((stay, index) => (
+                <li key={stay.slug}>
+                  <StayCard stay={stay} priority={index < 3} />
+                </li>
+              ))}
         </ul>
       ) : (
         <div className="mt-4 flex flex-col items-center rounded-card border border-dashed border-border-strong bg-card px-6 py-14 text-center">
@@ -89,7 +117,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/properties"
         </div>
       )}
 
-      <Pagination query={query} page={result.page} totalPages={result.totalPages} />
+      <Pagination query={query} page={page} totalPages={totalPages} />
     </>
   );
 }
