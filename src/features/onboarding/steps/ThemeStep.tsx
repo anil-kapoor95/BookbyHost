@@ -70,7 +70,7 @@ export function ThemeStep() {
       name: p?.name || draft.property.name || "Your property",
       place: [p?.city, p?.state].filter(Boolean).join(", "),
       // As the back office shows prices (System options > Price format)
-      price: price ? formatAdminPrice(price, state?.currency_sign || currency, state?.price_format ?? DEFAULT_PRICE_FORMAT) : null,
+      price: price ? formatAdminPrice(price, state?.currency_sign || currency, state?.price_format ?? DEFAULT_PRICE_FORMAT, currency) : null,
       facts: [
         bedrooms ? pluralize(bedrooms, "bedroom") : "",
         bathrooms ? pluralize(bathrooms, "bath") : "",

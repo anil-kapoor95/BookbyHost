@@ -94,7 +94,7 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
   const router = useRouter();
   const t = (key: string, tokens?: Record<string, string | number>) => label(setup.labels, key, tokens);
   const p = setup.property;
-  const money = (amount: number) => formatAdminPrice(amount, p.currency_sign || p.currency, p.price_format);
+  const money = (amount: number) => formatAdminPrice(amount, p.currency_sign || p.currency, p.price_format, p.currency);
   const perDay = p.price_based_on === "days";
   const unitLabel = (n: number) => t(perDay ? (n === 1 ? "bf_day" : "bf_days") : n === 1 ? "bf_night" : "bf_nights");
 
@@ -153,6 +153,19 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [coupon, setCoupon] = useState("");
+  const [couponError, setCouponError] = useState("");
+
+  // Apply the coupon code: an empty code is not sent, the guest is asked to enter one
+  function applyCoupon() {
+    const code = coupon.trim();
+    if (code === "") {
+      const text = t("book_coupon_required");
+      setCouponError(text === "book_coupon_required" ? "Please enter a coupon code." : text);
+      return;
+    }
+    setCouponError("");
+    update({ promo_code: code });
+  }
 
   function go(next: Step) {
     setStep(next);
@@ -423,22 +436,29 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                     <div className="flex gap-2">
                       <input
                         id="book-coupon"
-                        className={inputClass}
+                        className={cn(inputClass, "min-w-0", couponError && "border-[#c2410c] focus:border-[#c2410c] focus:ring-[#c2410c]/20")}
                         value={coupon}
-                        onChange={(event) => setCoupon(event.target.value)}
+                        onChange={(event) => {
+                          setCoupon(event.target.value);
+                          if (couponError) setCouponError("");
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") {
                             event.preventDefault();
-                            update({ promo_code: coupon.trim() });
+                            applyCoupon();
                           }
                         }}
                         placeholder={t("front_enter_promo_code")}
+                        aria-invalid={couponError ? true : undefined}
+                        aria-describedby={couponError ? "book-coupon-error" : undefined}
                       />
-                      <button type="button" className={cn(ghostButton, "h-12 shrink-0")} onClick={() => update({ promo_code: coupon.trim() })}>
+                      <button type="button" className={cn(ghostButton, "h-12 shrink-0 px-4 sm:px-5")} onClick={applyCoupon}>
                         {t("front_apply_promo_code")}
                       </button>
                     </div>
-                    {request.promo_code && priced ? (
+                    {couponError ? (
+                      <FieldError id="book-coupon-error">{couponError}</FieldError>
+                    ) : request.promo_code && priced ? (
                       priced.promo_valid ? (
                         <p className="mt-2 flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#15803d]"><Icon name="check" size={14} /> {t("book_coupon_applied")}</p>
                       ) : (
@@ -590,9 +610,9 @@ function StepTitle({ title, desc }: { title: string; desc: string }) {
   );
 }
 
-function FieldError({ children }: { children: ReactNode }) {
+function FieldError({ children, id }: { children: ReactNode; id?: string }) {
   return (
-    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#c2410c]">
+    <p id={id} role="alert" className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#c2410c]">
       <Icon name="alert" size={14} /> {children}
     </p>
   );

@@ -98,7 +98,7 @@ export function PropertyWebsite({
   const perDay = page.price_based_on === "days";
   const unitWord = (n: number) => t(perDay ? (n === 1 ? "site_day" : "site_days") : n === 1 ? "site_night" : "site_nights");
   const sign = page.currency_sign || page.currency;
-  const money = (amount: number) => formatAdminPrice(amount, sign, page.price_format);
+  const money = (amount: number) => formatAdminPrice(amount, sign, page.price_format, page.currency);
   const place = [page.location.city, page.location.state, page.location.country].filter(Boolean).join(", ");
   const typeLabel = page.property_type ? t("site_entire", { TYPE: t(`site_type_${page.property_type}`) }) : null;
   const [allAmenities, setAllAmenities] = useState(false);

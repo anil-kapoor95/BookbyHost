@@ -139,7 +139,7 @@ export function StayCard({ stay, priority = false }: { stay: DirectoryStay; prio
         headline: stay.headline,
         bedrooms: stay.bedrooms,
         maxGuests: stay.max_guests,
-        price: stay.price !== null ? formatAdminPrice(stay.price, stay.currency_sign || stay.currency, stay.price_format) : null,
+        price: stay.price !== null ? formatAdminPrice(stay.price, stay.currency_sign || stay.currency, stay.price_format, stay.currency) : null,
         priceFrom: stay.price_varies,
         unit: stay.price_based_on === "days" ? "day" : "night",
         photo: stay.photo ? { src: stay.photo, alt: stay.name } : null,

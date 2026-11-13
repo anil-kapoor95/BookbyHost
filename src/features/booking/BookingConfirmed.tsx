@@ -28,7 +28,7 @@ export function BookingConfirmed({
 }) {
   const t = (key: string, tokens?: Record<string, string | number>) => label(setup.labels, key, tokens);
   const p = setup.property;
-  const money = (amount: number) => formatAdminPrice(amount, p.currency_sign || p.currency, p.price_format);
+  const money = (amount: number) => formatAdminPrice(amount, p.currency_sign || p.currency, p.price_format, p.currency);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
 
   useEffect(() => {
@@ -109,22 +109,25 @@ export function BookingConfirmed({
             </>
           )}
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          {/* side by side when both fit on one line each, stacked full width otherwise (labels never squeeze) */}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {whatsapp && b ? (
               <a
                 href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`${p.name} · ${t("book_reference")}: ${b.reference}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-[0.75rem] bg-(--p-accent) px-5 font-heading font-bold text-white hover:brightness-95"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[0.75rem] bg-[#15803d] px-4 py-2.5 text-center font-heading text-[0.875rem] font-bold sm:gap-2.5 sm:px-5 sm:text-[0.9375rem] leading-snug text-white transition-[filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#15803d] focus-visible:ring-offset-2 sm:flex-[1_1_17rem]"
               >
-                <Icon name="smartphone" size={16} /> {t("book_message_host")}
+                <Icon name="messageCircle" size={18} className="shrink-0" />
+                <span>{t("book_message_host")}</span>
               </a>
             ) : null}
             <Link
               href={basePath || "/"}
-              className="inline-flex h-11 flex-1 items-center justify-center gap-1 rounded-[0.75rem] border border-(--p-line) px-5 font-heading font-semibold hover:border-(--p-accent)"
+              className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-[0.75rem] border border-(--p-line) bg-(--p-card) px-4 py-2.5 text-center font-heading text-[0.875rem] font-semibold sm:px-5 sm:text-[0.9375rem] leading-snug hover:border-(--p-accent) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--p-accent) sm:flex-[1_1_12rem]"
             >
-              <Icon name="chevronLeft" size={15} /> {t("book_back_to_property")}
+              <Icon name="chevronLeft" size={16} className="shrink-0" />
+              <span>{t("book_back_to_property")}</span>
             </Link>
           </div>
         </section>

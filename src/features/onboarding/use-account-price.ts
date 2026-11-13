@@ -12,5 +12,6 @@ export function useAccountPrice(currency: string): ((amount: number) => string) 
   if (!state?.price_format || !state.currency || state.currency !== currency) return undefined;
   const sign = state.currency_sign || state.currency;
   const format = state.price_format;
-  return (amount: number) => formatAdminPrice(amount, sign, format);
+  const code = state.currency;
+  return (amount: number) => formatAdminPrice(amount, sign, format, code);
 }

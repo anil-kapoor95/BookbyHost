@@ -581,7 +581,7 @@ export function PropertyStep() {
             error={errors.price}
             hint={
               Number(priceText) > 0
-                ? `Guests see: ${formatAdminPrice(Number(priceText), currencySign, priceFormat)} per night.${
+                ? `Guests see: ${formatAdminPrice(Number(priceText), currencySign, priceFormat, currency)} per night.${
                     saved?.price_varies ? " Your weekday rates differ; a new price here replaces them for every day." : ""
                   }`
                 : saved?.price_varies

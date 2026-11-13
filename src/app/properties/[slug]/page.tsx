@@ -8,6 +8,7 @@ import { DEFAULT_SITE_LABELS } from "@/features/property-page/default-labels";
 import { PropertyWebsite } from "@/features/property-page/PropertyWebsite";
 import type { PropertyPageData } from "@/lib/api/property-page";
 import { propertyRepository } from "@/lib/properties/repository";
+import { currencySymbol } from "@/lib/price-format";
 import { pageMetadata, truncate } from "@/lib/seo";
 import type { Property, ThemeId } from "@/types/property";
 
@@ -58,7 +59,7 @@ function toPageData(property: Property): PropertyPageData {
     price_varies: false,
     price_based_on: "nights",
     currency: property.price.currency,
-    currency_sign: property.price.currency === "INR" ? "₹" : property.price.currency,
+    currency_sign: currencySymbol(property.price.currency),
     price_format: { price_format: 3, currency_place: "front" },
     photos: property.images.map((image) => ({ url: image.src, thumb_url: image.src })),
     host: { name: property.host.name, logo: null, phone: "", email: "" },

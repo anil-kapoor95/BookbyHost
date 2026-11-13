@@ -158,7 +158,7 @@ function StayCard({ property, priceFormat }: { property: CompanyPageProperty; pr
             <p className="text-[0.8125rem] text-(--p-muted)">
               {property.price_varies ? "From " : ""}
               <strong className="font-heading text-[1.125rem] text-(--p-price)">
-                {formatAdminPrice(property.price, property.currency_sign || property.currency, priceFormat)}
+                {formatAdminPrice(property.price, property.currency_sign || property.currency, priceFormat, property.currency)}
               </strong>{" "}
               / {unit}
             </p>

@@ -141,6 +141,7 @@ const paths = {
   ),
   pencil: <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />,
   logout: <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />,
+  messageCircle: <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5Z" />,
   smartphone: (
     <>
       <rect x="6" y="2" width="12" height="20" rx="2.5" />
