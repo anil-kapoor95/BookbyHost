@@ -40,6 +40,8 @@ export interface BookingSetup {
   slug: string;
   /** Link of the company page (/stays/<company_slug>). */
   company_slug?: string;
+  /** false: the host's plan has expired and the property takes no bookings (missing = bookable). */
+  bookable?: boolean;
   property: {
     name: string;
     photo: string | null;

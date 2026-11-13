@@ -45,6 +45,8 @@ export interface PropertyPageData {
   booked: { from: string; to: string }[];
   /** Booking calendar of the back office (preview.php?cid=…). */
   booking_url: string;
+  /** false: the host's plan has expired, the page takes no bookings (missing = bookable). */
+  bookable?: boolean;
   /** Page texts (back office > Languages): the booking card keys and every site_* label ("{N}" style tokens). */
   labels: { book_now: string; check_in: string; check_out: string; choose_dates: string; adults: string; children: string } & Record<string, string>;
   /** Adults / children of the property's booking form. */

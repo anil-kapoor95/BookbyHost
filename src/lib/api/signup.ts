@@ -175,7 +175,8 @@ export interface ApiPlan {
   billing_interval: "month" | "year";
   interval_count: number;
   trial_days: number;
-  features: { key: string; label: string }[];
+  /** coming_soon: in the plan but not available yet (shown as "coming soon", never as a working feature). */
+  features: { key: string; label: string; coming_soon?: boolean }[];
   includes_themes: boolean;
   /** Can be bought online (active, public, with a price). */
   purchasable: boolean;
@@ -361,4 +362,6 @@ export interface CalendarSyncState {
   export_url: string;
   /** Result of the import (save / sync). */
   import?: { status: "OK" | "ERR"; text: string };
+  /** false: importing calendars is not in the host's plan (Airbnb / iCal sync); the export link still works. */
+  sync_allowed?: boolean;
 }

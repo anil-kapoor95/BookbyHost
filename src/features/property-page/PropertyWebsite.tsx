@@ -93,6 +93,8 @@ export function PropertyWebsite({
   demo?: boolean;
 }) {
   const t = translator(page.labels);
+  /** The host's plan has expired: the page stays visible, but takes no bookings. */
+  const closed = !demo && page.bookable === false;
   const perDay = page.price_based_on === "days";
   const unitWord = (n: number) => t(perDay ? (n === 1 ? "site_day" : "site_days") : n === 1 ? "site_night" : "site_nights");
   const sign = page.currency_sign || page.currency;
@@ -189,7 +191,7 @@ export function PropertyWebsite({
           </nav>
           <button
             type="button"
-            onClick={() => (demo ? document.getElementById("book")?.scrollIntoView({ behavior: "smooth" }) : router.push(bookHref()))}
+            onClick={() => (demo || closed ? document.getElementById("book")?.scrollIntoView({ behavior: "smooth" }) : router.push(bookHref()))}
             className={cn(accentButton, "h-10 shrink-0 text-[0.875rem]")}
           >
             {page.labels.book_now}
@@ -376,7 +378,7 @@ export function PropertyWebsite({
               <button
                 type="button"
                 onClick={() => router.push(bookHref())}
-                disabled={demo || rangeFree === false}
+                disabled={demo || closed || rangeFree === false}
                 title={demo ? "Example page: it can't be booked" : undefined}
                 className={cn(accentButton, "mt-4 h-12 w-full text-[1rem] disabled:cursor-not-allowed disabled:opacity-50")}
               >
@@ -384,6 +386,11 @@ export function PropertyWebsite({
               </button>
               {demo ? (
                 <p className="mt-2 text-center text-[0.75rem] text-white/70">This is an example page, so it can&apos;t be booked.</p>
+              ) : null}
+              {closed ? (
+                <p role="status" className="mt-2 text-center text-[0.8125rem] text-white/80">
+                  {page.labels.site_not_bookable || "This property is not taking bookings at the moment. Please contact the host."}
+                </p>
               ) : null}
               {whatsapp ? (
                 <a

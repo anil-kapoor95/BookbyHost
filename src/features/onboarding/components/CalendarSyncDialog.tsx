@@ -132,6 +132,12 @@ export function CalendarSyncDialog({
           <p className="text-small text-body">
             On Airbnb open <strong>Listing › Availability › Connect calendars › Export calendar</strong>, copy the link and paste it here.
           </p>
+          {state?.sync_allowed === false ? (
+            <p role="status" className="rounded-input border border-border bg-surface px-3 py-2.5 text-small text-body">
+              <Icon name="lock" size={14} className="mr-1 inline" /> Importing calendars (Airbnb / iCal sync) is not included in your plan.
+              Upgrade your plan to keep your Airbnb bookings in sync.
+            </p>
+          ) : null}
 
           {feeds.length > 0 ? (
             <ul className="grid gap-2">
@@ -174,7 +180,7 @@ export function CalendarSyncDialog({
               error={error || undefined}
               disabled={!token}
             />
-            <Button type="submit" disabled={!token || busy !== null || url.trim() === ""}>
+            <Button type="submit" disabled={!token || busy !== null || url.trim() === "" || state?.sync_allowed === false}>
               {busy === "save" ? "Importing…" : "Connect & import"}
             </Button>
           </form>

@@ -65,6 +65,20 @@ export function BookingFlow(props: FlowProps) {
     [],
   );
   const initialKey = JSON.stringify(props.initial);
+  if (props.setup.bookable === false) {
+    // the host's plan has expired: no booking form (the server refuses bookings as well)
+    return (
+      <div role="status" className="mx-auto max-w-xl rounded-[1rem] border border-(--p-line) bg-(--p-card) p-6 text-center text-(--p-text)">
+        <p className="font-heading text-[1.125rem] font-bold">{props.setup.property.name}</p>
+        <p className="mt-2 text-[0.9375rem] text-(--p-muted)">
+          {props.setup.labels?.site_not_bookable || "This property is not taking bookings at the moment. Please contact the host."}
+        </p>
+        <a href={props.basePath || "/"} className="mt-4 inline-block font-semibold text-(--p-accent) underline underline-offset-2">
+          {label(props.setup.labels, "book_back_to_property")}
+        </a>
+      </div>
+    );
+  }
   return (
     <BookingSession
       key={`${session}|${initialKey}`}

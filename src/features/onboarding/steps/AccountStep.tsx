@@ -29,6 +29,13 @@ import { setPendingGoogle, usePendingGoogle, type PendingGoogle } from "../googl
 import { GoogleButton } from "../components/GoogleButton";
 import { StepCard } from "../components/WizardShell";
 
+/** Plan code from ?plan= (pricing page), read when the form is sent (no search-params hook needed). */
+function pickedPlan(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const code = new URLSearchParams(window.location.search).get("plan")?.trim().toLowerCase() ?? "";
+  return /^[a-z0-9_-]{1,40}$/.test(code) ? code : undefined;
+}
+
 type Field = "name" | "email" | "whatsapp" | "password" | "confirm";
 type Errors = Partial<Record<Field, string>>;
 
@@ -146,6 +153,8 @@ function AccountForm({ google }: { google: PendingGoogle | null }) {
         confirm_password: values.confirm || undefined,
         google_access_token: google && !editing ? google.accessToken : undefined,
         google_client_id: google && !editing ? google.clientId : undefined,
+        // plan picked on the pricing page (/setup/account?plan=pro): its free trial starts with the company
+        plan: editing ? undefined : pickedPlan(),
       },
       editing ? token : undefined,
     );

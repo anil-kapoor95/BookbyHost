@@ -75,9 +75,11 @@ export function PlanGrid({ plans }: { plans: ApiPlan[] }) {
 /** Call to action of a plan: free / trial / on request / paid. */
 function planCta(plan: ApiPlan): { label: string; href: string } {
   if (plan.price === null) return { label: "Contact us", href: "/contact" };
-  if (plan.price === 0) return { label: "Start free", href: "/setup/account" };
-  if (plan.trial_days > 0) return { label: `Start ${plan.trial_days}-day free trial`, href: "/setup/account" };
-  return { label: `Get ${plan.name}`, href: "/setup/account" };
+  // the plan travels with the sign-up: a trial starts with the company, otherwise the free plan and an upgrade later
+  const href = `/setup/account?plan=${encodeURIComponent(plan.code)}`;
+  if (plan.price === 0) return { label: "Start free", href };
+  if (plan.trial_days > 0) return { label: `Start ${plan.trial_days}-day free trial`, href };
+  return { label: `Get ${plan.name}`, href };
 }
 
 function PlanCard({ plan, plans, index }: { plan: ApiPlan; plans: ApiPlan[]; index: number }) {

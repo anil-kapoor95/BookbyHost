@@ -43,13 +43,14 @@ export function planCardStyle(plan: ApiPlan, plans: ApiPlan[], featureKey?: stri
  * this plan all has; without one, every feature is listed.
  */
 export function planFeatureLines(plan: ApiPlan, earlier: ApiPlan[]): string[] {
+  const label = (feature: ApiPlan["features"][number]) => (feature.coming_soon ? `${feature.label} (coming soon)` : feature.label);
   const keys = new Set(plan.features.map((feature) => feature.key));
   const base = earlier
     .filter((other) => other.features.length < plan.features.length && other.features.every((f) => keys.has(f.key)))
     .sort((x, y) => y.features.length - x.features.length)[0];
-  if (!base) return plan.features.map((feature) => feature.label);
+  if (!base) return plan.features.map(label);
   const before = new Set(base.features.map((feature) => feature.key));
-  return [`Everything in ${base.name}`, ...plan.features.filter((f) => !before.has(f.key)).map((f) => f.label)];
+  return [`Everything in ${base.name}`, ...plan.features.filter((f) => !before.has(f.key)).map(label)];
 }
 
 /** Limits of the plan as card lines ("1 property", "Unlimited properties" …); unlimited ones are left out unless all are. */
@@ -61,7 +62,7 @@ export function planLimitLines(plan: ApiPlan): string[] {
   return [
     limits.max_properties === null ? "Unlimited properties" : line(limits.max_properties, "property", "properties"),
     line(limits.max_users, "team member", "team members"),
-    line(limits.max_payment_gateways, "online payment gateway", "online payment gateways"),
+    line(limits.max_payment_gateways, "payment gateway per property", "payment gateways per property"),
   ].filter((value): value is string => Boolean(value));
 }
 
