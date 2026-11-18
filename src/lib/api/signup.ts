@@ -169,9 +169,11 @@ export interface ApiPlan {
   code: string;
   name: string;
   description: string;
-  /** null: no price set yet (can't be bought online). */
+  /** null: no price set yet (can't be bought online). The USD (base, international) price. */
   price: number | null;
   currency: string;
+  /** Dual pricing: USD (international) and INR (India); null = not sold in that currency. */
+  prices?: { USD: number | null; INR: number | null };
   billing_interval: "month" | "year";
   interval_count: number;
   trial_days: number;
@@ -182,6 +184,8 @@ export interface ApiPlan {
   purchasable: boolean;
   /** Limits of the plan (null = unlimited). */
   limits?: { max_properties: number | null; max_users: number | null; max_payment_gateways: number | null };
+  /** Logged-in host only: may start this plan's free trial here (once, before a first payment). */
+  trial_available?: boolean;
 }
 
 export type PaymentMethodId = "paypal" | "authorize" | "razorpay" | "stripe" | "cash";
@@ -291,8 +295,11 @@ export const signupApi = {
   plans: (token?: string | null) =>
     apiRequest<{
       plans: ApiPlan[];
-      current: { code: string; name: string; status: string } | null;
+      current: { code: string; name: string; status: string; trial_ends_at?: string | null } | null;
       my_plan_url: string;
+      /** Currencies plans are sold in, and the company's billing currency (with a token). */
+      currencies?: string[];
+      billing_currency?: string | null;
     }>("pjActionGetPlans", {}, { token }),
 
   theme: (paletteId: string, token: string) =>

@@ -17,20 +17,45 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() || "";
 
 /** First parts of the StayOwned website's own pages: never shown on a host's domain. */
 const MARKETING = new Set([
-  "about", "blog", "contact", "faq", "help", "how-it-works", "login", "pricing", "privacy", "properties",
-  "property", "setup", "stays", "terms", "themes",
+  "about",
+  "blog",
+  "contact",
+  "faq",
+  "help",
+  "how-it-works",
+  "login",
+  "pricing",
+  "privacy",
+  "properties",
+  "property",
+  "setup",
+  "stays",
+  "terms",
+  "themes",
 ]);
 
 /** Hosts of the StayOwned website itself (NEXT_PUBLIC_SITE_URL, SITE_HOSTS, localhost, *.vercel.app). */
 const mainHosts = new Set(
   [process.env.NEXT_PUBLIC_SITE_URL, ...(process.env.SITE_HOSTS ?? "").split(",")]
-    .map((value) => (value ?? "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/[/:].*$/, ""))
+    .map((value) =>
+      (value ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/[/:].*$/, ""),
+    )
     .filter(Boolean)
     .flatMap((h) => [h, h.startsWith("www.") ? h.slice(4) : `www.${h}`]),
 );
 
 function isMainHost(host: string) {
-  return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host.endsWith(".vercel.app") || mainHosts.has(host);
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "[::1]" ||
+    host.endsWith(".vercel.app") ||
+    mainHosts.has(host)
+  );
 }
 
 type Site = { company_slug: string; property_slug: string | null; domain: string };
@@ -45,7 +70,11 @@ async function resolveDomain(host: string): Promise<Site | null> {
     try {
       const body = new FormData();
       body.append("host", host);
-      const response = await fetch(`${API_URL}?action=pjActionResolveDomain`, { method: "POST", body, cache: "no-store" });
+      const response = await fetch(`${API_URL}?action=pjActionResolveDomain`, {
+        method: "POST",
+        body,
+        cache: "no-store",
+      });
       const json = (await response.json()) as { status?: string; data?: Site };
       site = json.status === "OK" && json.data ? json.data : null;
     } catch {
@@ -56,6 +85,21 @@ async function resolveDomain(host: string): Promise<Site | null> {
   if (cache.size > 500) cache.clear();
   cache.set(host, { site, until: Date.now() + (site ? 60_000 : 30_000) });
   return site;
+}
+
+/**
+ * Country of the visitor's connection, when the hosting tells it (Vercel, Cloudflare, CloudFront, or a proxy that
+ * sets x-country-code): passed to the browser as the "so_geo" cookie, the first guess of the country selector
+ * (features/region/country.ts). Nothing is set when no header is there (local development: time zone is used).
+ */
+function withGeo(request: NextRequest, response: NextResponse) {
+  const geo = ["x-vercel-ip-country", "cf-ipcountry", "cloudfront-viewer-country", "x-country-code"]
+    .map((name) => (request.headers.get(name) ?? "").trim().toUpperCase())
+    .find((value) => /^[A-Z]{2}$/.test(value) && value !== "XX" && value !== "T1");
+  if (geo && request.cookies.get("so_geo")?.value !== geo) {
+    response.cookies.set("so_geo", geo, { path: "/", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" });
+  }
+  return response;
 }
 
 function notFound(request: NextRequest) {
@@ -81,9 +125,9 @@ export async function proxy(request: NextRequest) {
     if (Object.values(SITE_HEADERS).some((name) => request.headers.has(name))) {
       const headers = new Headers(request.headers);
       for (const name of Object.values(SITE_HEADERS)) headers.delete(name);
-      return NextResponse.next({ request: { headers } });
+      return withGeo(request, NextResponse.next({ request: { headers } }));
     }
-    return NextResponse.next();
+    return withGeo(request, NextResponse.next());
   }
 
   // A host's own domain

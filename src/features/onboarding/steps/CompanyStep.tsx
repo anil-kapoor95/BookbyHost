@@ -8,7 +8,13 @@ import { SelectField, TextareaField, TextField } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { PhoneField } from "@/components/ui/PhoneField";
 import { signupApi } from "@/lib/api/signup";
-import { DEFAULT_PHONE_COUNTRY, getPhoneCountry, splitInternational, toInternational, validatePhoneNumber } from "@/lib/phone";
+import {
+  DEFAULT_PHONE_COUNTRY,
+  getPhoneCountry,
+  splitInternational,
+  toInternational,
+  validatePhoneNumber,
+} from "@/lib/phone";
 import { validateEmail, validateRequired } from "@/lib/validation";
 import { setSignupFlash, updateSignupState, useSignupSession } from "../signup-session";
 import { hrefForNextStep, stepNumber } from "../steps";
@@ -126,8 +132,8 @@ export function CompanyStep() {
   function onLogoChange(file: File | undefined) {
     setErrors((current) => ({ ...current, logo: undefined }));
     if (!file) return chooseLogo(null);
-    if (!/^image\/(jpeg|png|gif|webp)$/.test(file.type)) {
-      setErrors((current) => ({ ...current, logo: "Logo must be a JPG, PNG, GIF or WEBP image." }));
+    if (!/^image\/(jpeg|png|gif|webp|avif)$/.test(file.type)) {
+      setErrors((current) => ({ ...current, logo: "Logo must be a JPG, PNG, GIF, WEBP or AVIF image." }));
       return;
     }
     if (file.size > MAX_LOGO_BYTES) {
@@ -147,7 +153,8 @@ export function CompanyStep() {
       city: validateRequired(values.city, "the city"),
       country_id: countryId ? undefined : "Please choose a country.",
       company_email: values.company_email ? validateEmail(values.company_email) : undefined,
-      website: values.website.trim() && !isWebsite(values.website) ? "Enter a website like www.example.com." : undefined,
+      website:
+        values.website.trim() && !isWebsite(values.website) ? "Enter a website like www.example.com." : undefined,
       phone: validatePhoneNumber(getPhoneCountry(phoneCountry), values.phone, { required: false }),
     };
     setErrors(next);
@@ -306,7 +313,11 @@ export function CompanyStep() {
             <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-input border border-border bg-surface-muted">
               {shownLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element -- local preview (blob:) or the back end's file
-                <img src={shownLogo} alt={logo ? "Preview of the chosen logo" : "Your saved logo"} className="size-full object-contain" />
+                <img
+                  src={shownLogo}
+                  alt={logo ? "Preview of the chosen logo" : "Your saved logo"}
+                  className="size-full object-contain"
+                />
               ) : (
                 <Icon name="image" size={22} className="text-muted" />
               )}
@@ -326,7 +337,7 @@ export function CompanyStep() {
               ref={logoInput}
               id="company-logo"
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
               className="sr-only"
               tabIndex={-1}
               aria-label="Choose a logo"

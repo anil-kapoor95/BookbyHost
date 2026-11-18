@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import type { NavItem } from "@/config/site";
+import { CountrySelector } from "@/features/region/CountrySelector";
 import { AuthNav } from "./AuthNav";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,8 @@ export function NavLinks({ items }: { items: NavItem[] }) {
               className={cn(
                 "relative rounded-sm py-1 text-menu font-medium text-nav transition-colors hover:text-link-hover",
                 "focus-visible:outline-none focus-visible:focus-ring",
-                active && "text-primary after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:rounded-pill after:bg-primary",
+                active &&
+                  "text-primary after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:rounded-pill after:bg-primary",
               )}
             >
               {item.label}
@@ -101,6 +103,10 @@ export function MobileNav({ items }: { items: NavItem[] }) {
           })}
           <div className="mt-4 border-t border-divider pt-5">
             <AuthNav variant="mobile" />
+          </div>
+          <div className="mt-5 grid gap-2">
+            <p className="text-small font-semibold text-heading">Country and currency</p>
+            <CountrySelector variant="field" label="Country" />
           </div>
         </nav>
       </div>

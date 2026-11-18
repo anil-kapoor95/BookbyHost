@@ -6,17 +6,36 @@ import type { ApiPlan } from "@/lib/api/signup";
  * and feature lines. Used by the Pricing page and the upgrade dialog of the sign-up.
  */
 
-export function formatPlanPrice(plan: ApiPlan): string {
+/** Currencies plans are sold in: USD (international, the base price) and INR (India). */
+export type PlanCurrency = "USD" | "INR";
+export const PLAN_CURRENCIES: PlanCurrency[] = ["USD", "INR"];
+
+export function isPlanCurrency(value: unknown): value is PlanCurrency {
+  return value === "USD" || value === "INR";
+}
+
+/** Price of a plan in a currency: null = on request / not sold in it; a free plan is free in every currency. */
+export function planPriceIn(plan: ApiPlan, currency: PlanCurrency = "USD"): number | null {
+  if (plan.price === null) return null;
+  if (plan.price === 0) return 0;
+  if (plan.prices) return plan.prices[currency] ?? null;
+  return plan.currency === currency ? plan.price : null;
+}
+
+/** "$19", "₹1,499", "Free", "On request" — in the chosen currency (USD by default). */
+export function formatPlanPrice(plan: ApiPlan, currency: PlanCurrency = "USD"): string {
+  const price = planPriceIn(plan, currency);
   if (plan.price === null) return "On request";
-  if (plan.price === 0) return "Free";
+  if (price === 0) return "Free";
+  if (price === null) return "On request";
   try {
-    return new Intl.NumberFormat("en", {
+    return new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
-      currency: plan.currency,
-      maximumFractionDigits: Number.isInteger(plan.price) ? 0 : 2,
-    }).format(plan.price);
+      currency,
+      maximumFractionDigits: Number.isInteger(price) ? 0 : 2,
+    }).format(price);
   } catch {
-    return `${plan.price} ${plan.currency}`;
+    return `${price} ${currency}`;
   }
 }
 

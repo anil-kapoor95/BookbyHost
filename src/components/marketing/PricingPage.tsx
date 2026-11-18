@@ -1,12 +1,13 @@
-import Link from "next/link";
 import { PLAN_STATS } from "@/data/plans";
 import type { ApiPlan } from "@/lib/api/signup";
-import { formatPlanPrice, planCardLines, planCardStyle, planPeriodLabel } from "@/lib/plan-display";
 import { cn } from "@/lib/utils";
 import { DisplaySectionHeader, FaqSection, LaunchCta } from "./display";
 import { PRICING_FAQS } from "./faq-data";
 import { HeroAccent, PageHero } from "./PageHero";
-import { PricingPlanCard, planCtaBase, planCtaClass } from "./PricingPlanCard";
+import { PlanGrid } from "./PlanGrid";
+
+/** The plan cards (with the USD / INR switch). Also used on the home page. */
+export { PlanGrid };
 
 /** "Pricing" page from the Figma "pricing page" frame (132:478). The plans come from the back office. */
 export function PricingPage({ plans }: { plans: ApiPlan[] }) {
@@ -47,59 +48,6 @@ function Plans({ plans }: { plans: ApiPlan[] }) {
         <PlanGrid plans={plans} />
       </div>
     </section>
-  );
-}
-
-/** The plan cards of the back office (Subscriptions > Plans). Also used on the home page. */
-export function PlanGrid({ plans }: { plans: ApiPlan[] }) {
-  return plans.length === 0 ? (
-    <p className="mx-auto mt-[67px] max-w-[560px] text-center text-body">
-      Plans are being updated. <Link href="/contact" className="font-semibold text-heading underline underline-offset-2">Contact us</Link> for prices.
-    </p>
-  ) : (
-    <ul
-      className={cn(
-        "mx-auto mt-[67px] grid max-w-[1112px] grid-cols-1 items-stretch gap-6",
-        plans.length === 2 && "md:grid-cols-2 md:max-w-[760px]",
-        plans.length >= 3 && "md:grid-cols-3",
-        plans.length === 1 && "max-w-[400px]",
-      )}
-    >
-      {plans.map((plan, index) => (
-        <PlanCard key={plan.id} plan={plan} plans={plans} index={index} />
-      ))}
-    </ul>
-  );
-}
-
-/** Call to action of a plan: free / trial / on request / paid. */
-function planCta(plan: ApiPlan): { label: string; href: string } {
-  if (plan.price === null) return { label: "Contact us", href: "/contact" };
-  // the plan travels with the sign-up: a trial starts with the company, otherwise the free plan and an upgrade later
-  const href = `/setup/account?plan=${encodeURIComponent(plan.code)}`;
-  if (plan.price === 0) return { label: "Start free", href };
-  if (plan.trial_days > 0) return { label: `Start ${plan.trial_days}-day free trial`, href };
-  return { label: `Get ${plan.name}`, href };
-}
-
-function PlanCard({ plan, plans, index }: { plan: ApiPlan; plans: ApiPlan[]; index: number }) {
-  const style = planCardStyle(plan, plans);
-  const cta = planCta(plan);
-  return (
-    <PricingPlanCard
-      name={plan.name}
-      price={formatPlanPrice(plan)}
-      period={planPeriodLabel(plan)}
-      note={plan.trial_days > 0 && plan.price ? `${plan.trial_days}-day free trial` : undefined}
-      features={planCardLines(plan, plans.slice(0, index))}
-      style={style}
-      badge={style === "popular" ? "Most popular" : undefined}
-      cta={
-        <Link href={cta.href} className={cn(planCtaBase, planCtaClass[style])}>
-          {cta.label}
-        </Link>
-      }
-    />
   );
 }
 

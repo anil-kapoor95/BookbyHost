@@ -1,4 +1,5 @@
 import { mainNav } from "@/config/site";
+import { CountrySelector } from "@/features/region/CountrySelector";
 import { AuthNav } from "./AuthNav";
 import { Logo } from "./Logo";
 import { MobileNav, NavLinks } from "./Navigation";
@@ -11,7 +12,9 @@ export function Header() {
         <nav aria-label="Main" className="hidden lg:block">
           <NavLinks items={mainNav} />
         </nav>
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-4 lg:flex">
+          {/* country = currency of every price on the site (India: INR, elsewhere USD) */}
+          <CountrySelector variant="compact" />
           <AuthNav variant="desktop" />
         </div>
         <MobileNav items={mainNav} />

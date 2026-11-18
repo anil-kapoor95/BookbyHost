@@ -50,7 +50,11 @@ export function LiveStep() {
   const slug = state?.property?.slug || property.slug || "your-page";
   const link = `${bookingLinkHost}/${slug}`;
   // The host's website: /<link of the property> (short link)
-  const websiteHref = state?.property?.slug ? `/${state.property.slug}` : state?.property?.name ? `/${slugify(state.property.name)}` : null;
+  const websiteHref = state?.property?.slug
+    ? `/${state.property.slug}`
+    : state?.property?.name
+      ? `/${slugify(state.property.name)}`
+      : null;
   // The company page: all the host's properties (/stays/<company name>)
   const companyHref = state?.company?.slug ? `/stays/${state.company.slug}` : null;
   const [copied, setCopied] = useState(false);
@@ -166,18 +170,14 @@ export function LiveStep() {
               {draft.published ? "Published & accepting bookings" : "Preview — not published yet"}
             </p>
             <h1 id="live-title" className="mt-5 text-hero text-on-dark">
-              {property.name} is{" "}
-              <span className="text-brand">
-                {draft.published ? "live" : "ready"}
-              </span>
-              .
+              {property.name} is <span className="text-brand">{draft.published ? "live" : "ready"}</span>.
             </h1>
             {state?.theme_applied === false ? (
               <p className="mt-3 text-small text-on-dark-muted">Your plan uses the default theme for now.</p>
             ) : null}
             <p className="mt-4 max-w-xl text-lead text-on-dark-muted">
-              Your page is ready to share. Send your direct link to guests messaging you on WhatsApp or Instagram to skip
-              OTA commissions.
+              Your page is ready to share. Send your direct link to guests messaging you on WhatsApp or Instagram to
+              skip OTA commissions.
             </p>
 
             <div className="mt-7 flex max-w-xl items-center gap-3 rounded-input border border-white/15 bg-white/5 p-2 pl-4">
@@ -232,7 +232,10 @@ export function LiveStep() {
           </div>
         </section>
       ) : (
-        <NoPropertyHero companyName={state?.company?.name || state?.account.name || "Your account"} loginUrl={loginUrl} />
+        <NoPropertyHero
+          companyName={state?.company?.name || state?.account.name || "Your account"}
+          loginUrl={loginUrl}
+        />
       )}
 
       {demoMessage ? (
@@ -264,7 +267,12 @@ export function LiveStep() {
         />
       ))}
 
-      <CalendarSyncDialog open={syncOpen} onClose={() => setSyncOpen(false)} token={token} onChange={setCalendarCount} />
+      <CalendarSyncDialog
+        open={syncOpen}
+        onClose={() => setSyncOpen(false)}
+        token={token}
+        onChange={setCalendarCount}
+      />
       <UpgradePlansDialog
         open={plansOpen}
         token={token}
@@ -273,6 +281,7 @@ export function LiveStep() {
         title="Unlock more payment gateways"
         intro="PayPal and cash are free on every plan. Authorize.Net, Razorpay and Stripe come with the plans that include payment gateway choice."
         keepFreeLabel="Keep PayPal and cash"
+        currentLabel="Check my plan again"
         onClose={() => setPlansOpen(false)}
         onKeepFree={() => setPlansOpen(false)}
         onRefresh={() => {
@@ -368,12 +377,18 @@ export function LiveStep() {
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3 text-caption text-body">
                       <span className="h-1.5 w-28 overflow-hidden rounded-pill bg-surface-sunken" aria-hidden="true">
-                        <span className={cn("block h-full rounded-pill bg-primary-strong", savedCalendars > 0 ? "w-full" : "w-0")} />
+                        <span
+                          className={cn(
+                            "block h-full rounded-pill bg-primary-strong",
+                            savedCalendars > 0 ? "w-full" : "w-0",
+                          )}
+                        />
                       </span>
                       <span>
                         {savedCalendars > 0 ? (
                           <>
-                            <strong className="text-heading">{savedCalendars}</strong> {savedCalendars === 1 ? "calendar" : "calendars"} connected
+                            <strong className="text-heading">{savedCalendars}</strong>{" "}
+                            {savedCalendars === 1 ? "calendar" : "calendars"} connected
                           </>
                         ) : (
                           "No calendar connected yet"
@@ -388,8 +403,13 @@ export function LiveStep() {
                     </Link>
                   </div>
                 </div>
-                <Button variant={savedCalendars > 0 ? "outline" : "primary"} onClick={() => setSyncOpen(true)} disabled={!hasProperty}>
-                  <Icon name={savedCalendars > 0 ? "refresh" : "calendar"} size={16} /> {savedCalendars > 0 ? "Manage sync" : "Sync Calendar"}
+                <Button
+                  variant={savedCalendars > 0 ? "outline" : "primary"}
+                  onClick={() => setSyncOpen(true)}
+                  disabled={!hasProperty}
+                >
+                  <Icon name={savedCalendars > 0 ? "refresh" : "calendar"} size={16} />{" "}
+                  {savedCalendars > 0 ? "Manage sync" : "Sync Calendar"}
                 </Button>
               </div>
             </li>
@@ -405,8 +425,8 @@ export function LiveStep() {
                   </h3>
                   <p className="mt-1 text-small text-body-strong">
                     Upgrade <code className="rounded-sm bg-surface px-1.5 py-0.5 text-caption">{link}</code> into{" "}
-                    <strong className="text-heading">www.{slug.replace(/-/g, "")}.com</strong> with free SSL
-                    and unlock all 4 premium designer themes (Luxe, Homestay, Urban, Coastal).
+                    <strong className="text-heading">www.{slug.replace(/-/g, "")}.com</strong> with free SSL and unlock
+                    all 4 premium designer themes (Luxe, Homestay, Urban, Coastal).
                   </p>
                 </div>
                 <Button href="/pricing" variant="outline" className="border-primary-subtle">
@@ -482,7 +502,11 @@ function MethodRow({
     >
       <span
         aria-hidden="true"
-        className={cn("grid size-9 shrink-0 place-items-center rounded-sm font-bold text-white", config.tileClass, locked && "opacity-60")}
+        className={cn(
+          "grid size-9 shrink-0 place-items-center rounded-sm font-bold text-white",
+          config.tileClass,
+          locked && "opacity-60",
+        )}
       >
         {config.initial}
       </span>

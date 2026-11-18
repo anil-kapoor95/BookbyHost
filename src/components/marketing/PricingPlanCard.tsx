@@ -14,6 +14,10 @@ export const planCtaClass: Record<PlanCardStyle, string> = {
 export const planCtaBase =
   "flex h-[52px] w-full items-center justify-center gap-2 rounded-pill px-[29px] font-heading text-[0.9375rem] font-bold leading-6 transition-colors focus-visible:outline-none focus-visible:focus-ring disabled:cursor-default disabled:opacity-70";
 
+/** Shorter button of a compact card (plans side by side in a window that should fit without scrolling). */
+export const planCtaBaseCompact =
+  "flex h-11 w-full items-center justify-center gap-2 rounded-pill px-5 font-heading text-[0.875rem] font-bold leading-5 transition-colors focus-visible:outline-none focus-visible:focus-ring disabled:cursor-default disabled:opacity-70";
+
 /**
  * One plan card as on the Pricing page: name, price, ticked features and a call to action.
  * Shared by the Pricing page and the upgrade dialog of the theme step.
@@ -54,26 +58,45 @@ export function PricingPlanCard({
       className={cn(
         // every card as tall as the tallest one in its row (the grid stretches them), button at the bottom
         "relative flex h-full snap-start flex-col rounded-plan border-2",
-        compact ? "px-6 py-8" : "px-[38px] py-11",
+        compact && "@container",
+        compact ? "px-5 pb-4 pt-5" : "px-[38px] py-11",
         style === "plain" && "border-border bg-surface",
         popular && "border-brand bg-surface shadow-plan-popular",
         dark && "border-secondary bg-secondary",
       )}
     >
       {badge ? (
-        <span className={cn("absolute -top-3.5", compact ? "left-6" : "left-9", "rounded-pill bg-primary px-4 py-[4.6px] font-heading text-caption font-extrabold uppercase leading-[19.2px] tracking-[0.06em] text-on-primary drop-shadow-popular-badge")}>
+        <span
+          className={cn(
+            "absolute -top-3.5",
+            compact ? "left-6" : "left-9",
+            "rounded-pill bg-primary px-4 py-[4.6px] font-heading text-caption font-extrabold uppercase leading-[19.2px] tracking-[0.06em] text-on-primary drop-shadow-popular-badge",
+          )}
+        >
           {badge}
         </span>
       ) : null}
 
-      <h3 className={cn("font-heading text-[1.5rem] font-extrabold leading-[1.1] tracking-[-0.035em]", dark ? "text-white" : "text-heading")}>
+      <h3
+        className={cn(
+          "font-heading font-extrabold leading-[1.1] tracking-[-0.035em]",
+          compact ? "text-[1.25rem]" : "text-[1.5rem]",
+          dark ? "text-white" : "text-heading",
+        )}
+      >
         {name}
       </h3>
-      <p className="flex min-h-[4.75rem] flex-wrap items-baseline gap-1 pb-1 pt-4">
+      <p className={cn("flex flex-wrap items-baseline gap-1", compact ? "pt-1" : "min-h-[4.75rem] pb-1 pt-4")}>
         <span
           className={cn(
             "font-display opsz-14",
-            longPrice ? "text-[1.75rem] font-bold leading-tight" : "text-price",
+            compact
+              ? longPrice
+                ? "text-[1.5rem] font-bold leading-tight"
+                : "text-[2.25rem] font-bold leading-[1.15] tracking-[-0.03em]"
+              : longPrice
+                ? "text-[1.75rem] font-bold leading-tight"
+                : "text-price",
             dark ? "text-white" : "text-heading",
           )}
         >
@@ -82,16 +105,30 @@ export function PricingPlanCard({
         {period ? <span className="font-heading text-[0.9375rem] font-medium text-body">{period}</span> : null}
       </p>
       {/* always the same space under the price, so the feature lists of all cards start on one line */}
-      <p className={cn("min-h-5 pb-[22px] font-heading text-small font-semibold", dark ? "text-plan-text-on-dark" : "text-success")}>
+      <p
+        className={cn(
+          "min-h-5 font-heading text-small font-semibold",
+          compact ? "pb-2" : "pb-[22px]",
+          dark ? "text-plan-text-on-dark" : "text-success",
+        )}
+      >
         {note ?? <span aria-hidden="true">&nbsp;</span>}
       </p>
 
-      <ul className="flex flex-1 flex-col gap-3.5 pb-9">
+      <ul
+        className={cn(
+          "flex flex-1 flex-col",
+          compact
+            ? "gap-1.5 pb-3 @[21rem]:grid @[21rem]:grid-cols-2 @[21rem]:content-start @[21rem]:gap-x-4"
+            : "gap-3.5 pb-9",
+        )}
+      >
         {features.map((feature) => (
           <li
             key={feature}
             className={cn(
-              "flex items-center gap-3 font-heading text-[0.9375rem] font-semibold leading-6",
+              "flex items-center font-heading font-semibold",
+              compact ? "gap-2 text-[0.8125rem] leading-[1.125rem]" : "gap-3 text-[0.9375rem] leading-6",
               dark ? "text-plan-text-on-dark" : "text-plan-text",
             )}
           >

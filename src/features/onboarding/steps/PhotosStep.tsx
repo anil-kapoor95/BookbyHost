@@ -18,7 +18,8 @@ import { StepCard, StepFooter } from "../components/WizardShell";
 const DEFAULT_MAX_PHOTOS = 20;
 const RECOMMENDED = 5;
 const MAX_BYTES = 10 * 1024 * 1024;
-const ACCEPT = ["image/jpeg", "image/png", "image/gif"]; // formats the back end stores
+// formats the back end takes (WEBP / AVIF are converted to JPG there)
+const ACCEPT = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 const SHOT_LIST = [
   "Outside view",
   "Living area",
@@ -69,10 +70,13 @@ export function PhotosStep() {
       return;
     }
     updateSignupState(result.data.state);
-    updateDraft((current) => (current.imported ? { ...current, imported: { ...current.imported, photosImported: true } } : current));
+    updateDraft((current) =>
+      current.imported ? { ...current, imported: { ...current.imported, photosImported: true } } : current,
+    );
     const notes: string[] = [];
     if (result.data.failed > 0) notes.push(`${result.data.failed} Airbnb photo(s) could not be added.`);
-    if (result.data.skipped > 0) notes.push(`${result.data.skipped} photo(s) were left out: a property can have up to ${MAX_PHOTOS} photos.`);
+    if (result.data.skipped > 0)
+      notes.push(`${result.data.skipped} photo(s) were left out: a property can have up to ${MAX_PHOTOS} photos.`);
     setMessages(notes);
     setStatus(result.message);
   }
@@ -88,7 +92,7 @@ export function PhotosStep() {
         break;
       }
       if (!ACCEPT.includes(file.type)) {
-        problems.push(`${file.name}: only JPG, PNG or GIF images are supported.`);
+        problems.push(`${file.name}: only JPG, PNG, GIF, WEBP or AVIF images are supported.`);
         continue;
       }
       if (file.size > MAX_BYTES) {
@@ -179,7 +183,7 @@ export function PhotosStep() {
             browse
           </button>
         </p>
-        <p className="text-caption text-muted">JPG, PNG or GIF · up to 10 MB each · up to {MAX_PHOTOS} photos</p>
+        <p className="text-caption text-muted">JPG, PNG, GIF or WEBP · up to 10 MB each · up to {MAX_PHOTOS} photos</p>
         <input
           ref={inputRef}
           type="file"
@@ -202,10 +206,13 @@ export function PhotosStep() {
         >
           <div>
             <h2 id="airbnb-photos-title" className="flex items-center gap-2 font-body text-base font-bold text-heading">
-              <Icon name="image" size={18} className="text-primary" /> {airbnbPhotos.length} photos found on your Airbnb listing
+              <Icon name="image" size={18} className="text-primary" /> {airbnbPhotos.length} photos found on your Airbnb
+              listing
             </h2>
             <p className="mt-0.5 text-small text-body">
-              Add them here in one click{photos.length + airbnbPhotos.length > MAX_PHOTOS ? ` (the first ${MAX_PHOTOS - photos.length})` : ""}. You can remove any of them afterwards.
+              Add them here in one click
+              {photos.length + airbnbPhotos.length > MAX_PHOTOS ? ` (the first ${MAX_PHOTOS - photos.length})` : ""}.
+              You can remove any of them afterwards.
             </p>
           </div>
           <Button
