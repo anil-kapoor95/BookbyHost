@@ -85,7 +85,7 @@ export default async function ExamplePropertyPage({ params }: PageProps<"/proper
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 text-small sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p className="flex items-center gap-2">
             <Icon name="info" size={16} className="shrink-0" />
-            This is an example page showing a StayOwned design. It can&apos;t be booked.
+            This is an example page showing a BookbyHost design. It can&apos;t be booked.
           </p>
           <span className="flex shrink-0 items-center gap-4">
             <Link href="/properties" className="font-semibold underline underline-offset-2 hover:no-underline">

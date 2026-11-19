@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     return respond(503, "We can't import right now. Please try again in a moment, or fill in the details below.");
   }
   if (check.data.status === "other") {
-    return respond(409, "This Airbnb listing is already connected to another StayOwned account. If it's yours, contact us.", {
+    return respond(409, "This Airbnb listing is already connected to another BookbyHost account. If it's yours, contact us.", {
       errors: { url: "This listing is already connected to another account." },
     });
   }

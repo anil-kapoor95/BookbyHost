@@ -21,7 +21,7 @@ export interface ThemePreviewData {
   photo: string | null;
   /** More photos for the gallery (after the first). */
   morePhotos: string[];
-  /** "stayowned.com/green-casa" */
+  /** "bookbyhost.com/green-casa" */
   link: string;
 }
 
@@ -213,7 +213,7 @@ function GuestPage({ theme, data, mobile }: { theme: ApiTheme; data: ThemePrevie
       </div>
       <div className="mt-2 flex justify-between gap-3 bg-(--t-brand) px-4 py-4 text-caption text-white sm:px-5">
         <span className="truncate">© {data.name}</span>
-        <span className="shrink-0">Powered by StayOwned</span>
+        <span className="shrink-0">Powered by BookbyHost</span>
       </div>
     </div>
   );

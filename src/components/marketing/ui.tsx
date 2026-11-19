@@ -8,7 +8,7 @@ export const SUPPORT = {
   phoneDisplay: "+91 98765 43210",
   phoneHref: "tel:+919876543210",
   whatsappHref: "https://wa.me/919876543210",
-  email: "hello@stayowned.com",
+  email: "hello@bookbyhost.com",
 } as const;
 
 /** Small uppercase label above a heading, in the three styles used in the Figma frames. */

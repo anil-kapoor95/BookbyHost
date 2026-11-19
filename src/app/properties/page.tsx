@@ -15,7 +15,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Stays booked directly with hosts",
   description:
-    "Browse villas, homestays, apartments and cottages that take direct bookings on StayOwned — no OTA commission.",
+    "Browse villas, homestays, apartments and cottages that take direct bookings on BookbyHost — no OTA commission.",
   path: "/properties",
 });
 
@@ -83,7 +83,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/properties"
       {examples ? (
         <p className="mt-2 flex items-center gap-2 text-small text-body">
           <Icon name="info" size={15} className="shrink-0 text-primary-strong" />
-          These are example stays showing the StayOwned designs. Real stays appear here as soon as hosts publish their pages.
+          These are example stays showing the BookbyHost designs. Real stays appear here as soon as hosts publish their pages.
         </p>
       ) : null}
 

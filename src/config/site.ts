@@ -6,7 +6,7 @@
 const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
 export const siteConfig = {
-  name: "StayOwned",
+  name: "BookbyHost",
   tagline: "Your own booking website for villas, homestays and holiday homes.",
   description:
     "Create a direct booking website for your villa, homestay or holiday home in about 5 minutes. Share one link on WhatsApp and Instagram and take bookings with 0% commission.",
@@ -64,15 +64,15 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
 export const placeholderPages = {
   "how-it-works": {
     title: "How it works",
-    description: "A step-by-step look at creating and sharing your StayOwned booking page.",
+    description: "A step-by-step look at creating and sharing your BookbyHost booking page.",
   },
   faq: { title: "FAQ", description: "Answers to common questions from hosts." },
   login: { title: "Log in", description: "Sign in to manage your booking page." },
-  about: { title: "About us", description: "The team behind StayOwned." },
+  about: { title: "About us", description: "The team behind BookbyHost." },
   blog: { title: "Blog", description: "Guides for independent hosts." },
   help: { title: "Help centre", description: "Setup guides and support articles." },
-  terms: { title: "Terms of use", description: "The terms that apply to StayOwned." },
-  privacy: { title: "Privacy policy", description: "How StayOwned handles your data." },
+  terms: { title: "Terms of use", description: "The terms that apply to BookbyHost." },
+  privacy: { title: "Privacy policy", description: "How BookbyHost handles your data." },
 } as const;
 
 export type PlaceholderSlug = keyof typeof placeholderPages;

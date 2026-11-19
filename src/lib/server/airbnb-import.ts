@@ -34,7 +34,7 @@ export interface ListingImportProvider {
   fetchListing(listingId: string, host: string, signal: AbortSignal): Promise<ProviderResult>;
 }
 
-const USER_AGENT = "Mozilla/5.0 (compatible; StayOwnedListingImport/1.0)";
+const USER_AGENT = "Mozilla/5.0 (compatible; BookbyHostListingImport/1.0)";
 const MAX_PAGE_BYTES = 6 * 1024 * 1024;
 const MAX_REDIRECTS = 3;
 

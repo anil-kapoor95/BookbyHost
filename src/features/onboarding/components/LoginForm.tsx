@@ -139,7 +139,7 @@ export function LoginForm() {
           {busy ? "Logging in…" : "Log in"}
         </Button>
         <p className="text-center text-small text-body">
-          New to StayOwned?{" "}
+          New to BookbyHost?{" "}
           <Link
             href={ACCOUNT_HREF}
             className="rounded-sm font-semibold text-primary-strong underline underline-offset-2 hover:text-link-hover focus-visible:outline-none focus-visible:focus-ring"

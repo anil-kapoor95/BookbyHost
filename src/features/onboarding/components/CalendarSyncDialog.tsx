@@ -200,13 +200,13 @@ export function CalendarSyncDialog({
         <section className="grid gap-3 border-t border-border pt-5">
           <h3 className="font-heading text-base font-bold text-heading">2. Block direct bookings on Airbnb</h3>
           <p className="text-small text-body">
-            On Airbnb open <strong>Connect calendars › Import calendar</strong> and paste this link of your StayOwned calendar.
+            On Airbnb open <strong>Connect calendars › Import calendar</strong> and paste this link of your BookbyHost calendar.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               readOnly
               value={state?.export_url ?? ""}
-              aria-label="Your StayOwned calendar link"
+              aria-label="Your BookbyHost calendar link"
               onFocus={(event) => event.currentTarget.select()}
               className="h-control min-w-0 flex-1 rounded-input border border-input-border bg-input-disabled px-4 text-small text-heading"
             />

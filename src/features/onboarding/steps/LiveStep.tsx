@@ -442,10 +442,10 @@ export function LiveStep() {
             <ol className="grid gap-4">
               {[
                 ["Click Connect", "and add the keys of your PayPal account, or switch on cash payments."],
-                ["Guests pay directly", "on your StayOwned website, online or in cash on arrival."],
+                ["Guests pay directly", "on your BookbyHost website, online or in cash on arrival."],
                 [
                   "Direct deposit",
-                  ": Payments settle straight into your verified bank account with 0% StayOwned commission.",
+                  ": Payments settle straight into your verified bank account with 0% BookbyHost commission.",
                 ],
               ].map(([strong, rest], index) => (
                 <li key={strong} className="flex gap-3 text-small text-body">

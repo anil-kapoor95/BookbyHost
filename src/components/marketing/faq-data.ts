@@ -68,7 +68,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         id: "commission",
         question: "Do you take a commission?",
-        answer: "No. StayOwned charges 0% commission on direct bookings — you keep what your guests pay.",
+        answer: "No. BookbyHost charges 0% commission on direct bookings — you keep what your guests pay.",
       },
       {
         id: "international",
@@ -111,7 +111,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "own-domain",
         question: "Can I use my own domain?",
         answer:
-          "Yes, with Pro. Turn stayowned.com/your-property into www.yourproperty.com — SSL is included at no extra cost.",
+          "Yes, with Pro. Turn bookbyhost.com/your-property into www.yourproperty.com — SSL is included at no extra cost.",
       },
       {
         id: "premium-themes",
@@ -148,7 +148,7 @@ export const HOME_FAQS: FaqItem[] = [
     id: "leave-airbnb",
     question: "Do I need to leave Airbnb?",
     answer:
-      "No. Keep your Airbnb listing for new guests. Use your StayOwned page for repeat guests and WhatsApp enquiries. Both calendars stay in sync.",
+      "No. Keep your Airbnb listing for new guests. Use your BookbyHost page for repeat guests and WhatsApp enquiries. Both calendars stay in sync.",
   },
   {
     id: "starter-free",
@@ -227,7 +227,7 @@ export const PRICING_FAQS: FaqItem[] = [
     question: "Do my guests pay extra processing fees?",
     // Draft — not in Figma.
     answer:
-      "StayOwned adds no fee for your guests. Payments run through your own gateway (Razorpay on Starter), whose standard charges apply to your account.",
+      "BookbyHost adds no fee for your guests. Payments run through your own gateway (Razorpay on Starter), whose standard charges apply to your account.",
   },
   {
     id: "cancel",

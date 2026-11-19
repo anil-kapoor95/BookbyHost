@@ -108,7 +108,7 @@ function HeroVisual() {
             <span className="size-2.5 rounded-pill bg-window-zoom" />
           </span>
           <span className="flex-1 truncate rounded-sm bg-surface-muted px-3 py-1 text-center text-caption font-semibold text-heading">
-            stayowned.com/<span className="text-primary-strong">green-casa</span>
+            bookbyhost.com/<span className="text-primary-strong">green-casa</span>
           </span>
         </div>
         <div className="relative aspect-photo">
@@ -286,7 +286,7 @@ function HowSteps() {
         <div className="grid gap-1.5 text-micro">
           <span className="w-4/5 rounded-sm bg-surface px-2 py-1 text-heading">Is Green Casa free 12–15 Dec?</span>
           <span className="ml-auto w-4/5 rounded-sm bg-primary px-2 py-1 text-on-primary">
-            Yes! Book here: stayowned.com/green-casa
+            Yes! Book here: bookbyhost.com/green-casa
           </span>
           <span className="w-fit rounded-pill bg-secondary px-2 py-0.5 font-semibold text-on-dark">
             ✓ Booked and paid
@@ -378,7 +378,7 @@ function BookingFlow() {
           </span>
           <span className="ml-auto rounded-input bg-secondary px-3 py-2 text-on-dark">
             Yes! Book directly here:
-            <span className="mt-1 block rounded-sm bg-white/10 px-2 py-0.5 text-micro">stayowned.com/green-casa</span>
+            <span className="mt-1 block rounded-sm bg-white/10 px-2 py-0.5 text-micro">bookbyhost.com/green-casa</span>
           </span>
         </div>
       ),
@@ -419,7 +419,7 @@ function BookingFlow() {
         eyebrow="Direct booking flow"
         eyebrowVariant="pill"
         title="They found your property. Make it seamless to book with you."
-        description="Guests find you on Airbnb, Instagram or Google — then message you on WhatsApp. Send them your branded StayOwned website instead of sending them back to pay OTA fees."
+        description="Guests find you on Airbnb, Instagram or Google — then message you on WhatsApp. Send them your branded BookbyHost website instead of sending them back to pay OTA fees."
       />
       <ol className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
         {cards.map((card, index) => (

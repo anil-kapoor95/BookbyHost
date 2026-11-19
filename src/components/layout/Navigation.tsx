@@ -105,7 +105,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
             <AuthNav variant="mobile" />
           </div>
           <div className="mt-5 grid gap-2">
-            <p className="text-small font-semibold text-heading">Country and currency</p>
+            <p className="text-small font-semibold text-heading">Country</p>
             <CountrySelector variant="field" label="Country" />
           </div>
         </nav>

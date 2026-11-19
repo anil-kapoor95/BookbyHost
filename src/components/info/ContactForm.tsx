@@ -43,7 +43,7 @@ export function ContactForm() {
       <div className="grid gap-4">
         <Notice tone="info" role="status" title="Demo mode — your message was not sent">
           This static build has no backend or email service, so nothing left your browser. Once the API is connected, this form
-          will deliver messages to the StayOwned team.
+          will deliver messages to the BookbyHost team.
         </Notice>
         <Button variant="outline" className="justify-self-start" onClick={() => setDone(false)}>
           Edit message
@@ -53,7 +53,7 @@ export function ContactForm() {
   }
 
   return (
-    <form noValidate onSubmit={onSubmit} className="grid gap-5" aria-label="Contact StayOwned">
+    <form noValidate onSubmit={onSubmit} className="grid gap-5" aria-label="Contact BookbyHost">
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField id="contact-name" label="Your name" autoComplete="name" value={values.name} onChange={(e) => set("name")(e.target.value)} error={errors.name} required />
         <TextField

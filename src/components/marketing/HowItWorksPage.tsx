@@ -300,7 +300,7 @@ const BIG_STEPS: {
       <div className="grid gap-2.5 text-caption">
         <span className="ml-auto max-w-[85%] rounded-input bg-whatsapp px-3 py-2 text-white">
           Hi! Here&apos;s our villa, book direct and skip the commission:{" "}
-          <span className="font-semibold underline">stayowned.com/green-casa</span>
+          <span className="font-semibold underline">bookbyhost.com/green-casa</span>
         </span>
         <span className="max-w-[80%] rounded-input bg-surface px-3 py-2 text-heading">
           Dates look free. Booking now!
@@ -396,7 +396,7 @@ const NEXT = [
     title: "Use your own domain",
     badge: <Badge variant="pro">Pro</Badge>,
     icon: "link" as const,
-    text: "Turn stayowned.com/green-casa into www.greencasa.com and unlock all premium themes.",
+    text: "Turn bookbyhost.com/green-casa into www.greencasa.com and unlock all premium themes.",
     pro: true,
   },
 ];
@@ -478,7 +478,7 @@ function WhyDirect() {
             </ul>
           </div>
           <div className="rounded-card bg-primary-soft p-7">
-            <p className="text-caption font-bold uppercase tracking-wider text-primary-strong">With StayOwned</p>
+            <p className="text-caption font-bold uppercase tracking-wider text-primary-strong">With BookbyHost</p>
             <ul className="mt-5 grid gap-3">
               {stayowned.map((item) => (
                 <CheckItem key={item}>{item}</CheckItem>

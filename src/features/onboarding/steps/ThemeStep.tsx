@@ -123,7 +123,7 @@ export function ThemeStep() {
     if (result.ok) {
       updateSignupState(result.data);
       // The host stays logged in on this browser (Log out in the header).
-      setSignupFlash({ tone: "success", text: "Registration complete — you're logged in to your StayOwned account." });
+      setSignupFlash({ tone: "success", text: "Registration complete — you're logged in to your BookbyHost account." });
       router.push(LIVE_HREF);
       return;
     }

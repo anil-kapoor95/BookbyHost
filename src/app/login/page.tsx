@@ -4,7 +4,7 @@ import { LoginForm } from "@/features/onboarding/components/LoginForm";
 
 export const metadata: Metadata = {
   title: "Log in",
-  description: "Log in to manage your StayOwned booking page.",
+  description: "Log in to manage your BookbyHost booking page.",
   robots: { index: false, follow: true },
 };
 

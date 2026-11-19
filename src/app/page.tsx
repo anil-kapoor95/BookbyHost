@@ -3,7 +3,7 @@ import { getPublicPlans } from "@/lib/api/plans";
 import { getPublicThemes } from "@/lib/api/themes";
 import { pageMetadata } from "@/lib/seo";
 
-const title = "StayOwned — your own direct booking website";
+const title = "BookbyHost — your own direct booking website";
 const description =
   "Get your own booking page in 5 minutes. Add your property, AI writes the rest, and guests book and pay you directly with 0% commission.";
 

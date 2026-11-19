@@ -3,16 +3,17 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
-import { COUNTRIES, currencyForCountry, currencyLabel, findCountry, setCountry, useCountry } from "./country";
+import { COUNTRIES, findCountry, setCountry, useCountry } from "./country";
 
 /** Countries shown first (the two currencies' main markets), then every country by name. */
 const TOP = ["IN", "US"];
 
 /**
- * Country picker: search by name or code, India shows "₹ INR", every other country "$ USD". Changing it changes the
- * country (and the currency of every price) on the whole website, unless `onSelect` handles the choice itself.
- *   compact  header pill: flag + currency
- *   inline   "Prices for 🇮🇳 India · ₹ INR  Change" above the plan cards
+ * Country picker: shows country names only (search by name or code). The country decides the currency of every
+ * price on the website (India: INR, every other country: USD) without showing it here. Changing it changes the
+ * country on the whole website, unless `onSelect` handles the choice itself.
+ *   compact  header pill: flag + country name
+ *   inline   "Prices for 🇮🇳 India" above the plan cards
  *   field    full-width field (checkout: billing country)
  */
 export function CountrySelector({
@@ -36,7 +37,6 @@ export function CountrySelector({
 }) {
   const site = useCountry();
   const country = findCountry(value) ?? site.country;
-  const currency = currencyForCountry(country.code);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -108,13 +108,13 @@ export function CountrySelector({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`${label}: ${country.name}, prices in ${currency}. Change`}
+        aria-label={`${label}: ${country.name}. Change`}
         className="flex h-9 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 text-small font-semibold text-heading transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:focus-ring"
       >
         <span aria-hidden="true" className="text-[1.05rem] leading-none">
           {country.flag}
         </span>
-        <span>{currency === "INR" ? "₹ INR" : "$ USD"}</span>
+        <span className="max-w-36 truncate">{country.name}</span>
         <Icon name="chevronDown" size={14} className={cn("text-muted transition-transform", open && "rotate-180")} />
       </button>
     ) : variant === "inline" ? (
@@ -127,14 +127,13 @@ export function CountrySelector({
           disabled={disabled}
           aria-haspopup="listbox"
           aria-expanded={open}
-          aria-label={`Prices for ${country.name} in ${currency}. Change country`}
+          aria-label={`Prices for ${country.name}. Change country`}
           className="inline-flex items-center gap-2 rounded-pill border border-border bg-surface py-1.5 pr-3 pl-2.5 font-semibold text-heading shadow-sm transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:focus-ring"
         >
           <span aria-hidden="true" className="text-[1.05rem] leading-none">
             {country.flag}
           </span>
           {country.name}
-          <span className="font-normal text-muted">· {currencyLabel(currency)}</span>
           <Icon name="chevronDown" size={14} className={cn("text-muted transition-transform", open && "rotate-180")} />
         </button>
       </p>
@@ -153,7 +152,6 @@ export function CountrySelector({
           {country.flag}
         </span>
         <span className="min-w-0 flex-1 truncate font-semibold">{country.name}</span>
-        <span className="shrink-0 text-small text-muted">{currencyLabel(currency)}</span>
         {!disabled ? (
           <Icon name="chevronDown" size={16} className="shrink-0 text-muted" />
         ) : (
@@ -228,7 +226,6 @@ export function CountrySelector({
                   >
                     {c.name}
                   </span>
-                  <span className="shrink-0 text-caption text-muted">{c.code === "IN" ? "₹ INR" : "$ USD"}</span>
                   {selected ? <Icon name="check" size={14} className="shrink-0 text-primary" /> : null}
                 </li>
               );

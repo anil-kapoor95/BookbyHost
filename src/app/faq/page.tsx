@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "FAQ",
-  description: "Everything about going live, getting paid and staying in sync with StayOwned.",
+  description: "Everything about going live, getting paid and staying in sync with BookbyHost.",
   path: "/faq",
 });
 
