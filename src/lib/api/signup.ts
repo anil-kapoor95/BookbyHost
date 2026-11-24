@@ -98,6 +98,12 @@ export interface SignupState {
   ai_available: boolean;
   /** AI writing is set up but not in the account's plan (paid plans only). */
   ai_locked?: boolean;
+  /** false: Airbnb / iCal calendar sync is not in the account's plan (hidden in the sign-up). */
+  ical_sync_allowed?: boolean;
+  /** true: the paid themes are in the account's plan (a trial counts). */
+  themes_allowed?: boolean;
+  /** true: "Your own domain" is in the account's plan (a trial counts). */
+  custom_domain_allowed?: boolean;
   /** Sign of the account's currency (back-office currency data). */
   currency_sign?: string;
   /** System options > Price format and currency position. */

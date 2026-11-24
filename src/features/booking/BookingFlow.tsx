@@ -7,13 +7,7 @@ import { Icon } from "@/components/ui/Icon";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { themeStyle } from "@/features/property-page/theme";
-import {
-  bookingApi,
-  label,
-  type BookingQuote,
-  type BookingRequest,
-  type BookingSetup,
-} from "@/lib/api/booking";
+import { bookingApi, label, type BookingQuote, type BookingRequest, type BookingSetup } from "@/lib/api/booking";
 import { formatAdminPrice } from "@/lib/price-format";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +27,13 @@ const todayIso = () => {
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())).toISOString().slice(0, 10);
 };
 const fmtDay = (value: string) =>
-  new Date(`${value}T00:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  new Date(`${value}T00:00:00Z`).toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 const isDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 
 type FlowProps = {
@@ -68,12 +68,19 @@ export function BookingFlow(props: FlowProps) {
   if (props.setup.bookable === false) {
     // the host's plan has expired: no booking form (the server refuses bookings as well)
     return (
-      <div role="status" className="mx-auto max-w-xl rounded-[1rem] border border-(--p-line) bg-(--p-card) p-6 text-center text-(--p-text)">
+      <div
+        role="status"
+        className="mx-auto max-w-xl rounded-[1rem] border border-(--p-line) bg-(--p-card) p-6 text-center text-(--p-text)"
+      >
         <p className="font-heading text-[1.125rem] font-bold">{props.setup.property.name}</p>
         <p className="mt-2 text-[0.9375rem] text-(--p-muted)">
-          {props.setup.labels?.site_not_bookable || "This property is not taking bookings at the moment. Please contact the host."}
+          {props.setup.labels?.site_not_bookable ||
+            "This property is not taking bookings at the moment. Please contact the host."}
         </p>
-        <a href={props.basePath || "/"} className="mt-4 inline-block font-semibold text-(--p-accent) underline underline-offset-2">
+        <a
+          href={props.basePath || "/"}
+          className="mt-4 inline-block font-semibold text-(--p-accent) underline underline-offset-2"
+        >
           {label(props.setup.labels, "book_back_to_property")}
         </a>
       </div>
@@ -100,7 +107,10 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
 
   // Steps: extras only when the property has extras or coupons
   const steps = useMemo<Step[]>(
-    () => (setup.extras.length > 0 || setup.coupons ? ["stay", "extras", "details", "payment"] : ["stay", "details", "payment"]),
+    () =>
+      setup.extras.length > 0 || setup.coupons
+        ? ["stay", "extras", "details", "payment"]
+        : ["stay", "details", "payment"],
     [setup.extras.length, setup.coupons],
   );
   const stepLabel: Record<Step, string> = {
@@ -116,8 +126,7 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
   const [request, setRequest] = useState<BookingRequest>(() => ({
     date_from: initial.date_from && isDate(initial.date_from) ? initial.date_from : "",
     date_to: initial.date_to && isDate(initial.date_to) ? initial.date_to : "",
-    adults: Math.min(setup.guests.adults.max, Math.max(setup.guests.adults.show ? 1 : 0, initial.adults ?? 1)),
-    children: Math.min(setup.guests.children.max, Math.max(0, initial.children ?? 0)),
+    ...startGuests(setup.guests, initial.adults, initial.children),
     extras: Object.fromEntries(setup.extras.filter((e) => e.required).map((e) => [e.id, 1])),
     promo_code: "",
   }));
@@ -131,7 +140,11 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
       void bookingApi
         .quote(setup.slug, request, controller.signal)
         .then((result) => {
-          setQuote(result.ok ? { key: requestKey, data: result.data, error: "" } : { key: requestKey, data: null, error: result.message });
+          setQuote(
+            result.ok
+              ? { key: requestKey, data: result.data, error: "" }
+              : { key: requestKey, data: null, error: result.message },
+          );
         })
         .catch(() => undefined);
     }, 250);
@@ -189,7 +202,8 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
     for (const field of setup.fields) {
       const value = (details[field.name] ?? "").trim();
       if (field.required && !value) found[field.name] = t("book_err_required");
-      else if (value && field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) found[field.name] = t("book_err_email");
+      else if (value && field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+        found[field.name] = t("book_err_email");
     }
     setErrors(found);
     const first = Object.keys(found)[0];
@@ -236,11 +250,19 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
     ? setup.terms.label.split("%s").map((part, i) =>
         i === 1 ? (
           setup.terms?.url ? (
-            <a key={i} href={setup.terms.url} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+            <a
+              key={i}
+              href={setup.terms.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold underline"
+            >
               {part}
             </a>
           ) : (
-            <span key={i} className="font-semibold">{part}</span>
+            <span key={i} className="font-semibold">
+              {part}
+            </span>
           )
         ) : (
           <span key={i}>{part}</span>
@@ -275,13 +297,19 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.host.logo} alt="" className="size-9 shrink-0 rounded-[0.5rem] object-contain" />
             ) : (
-              <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-[0.5rem] bg-(--p-brand) font-heading text-[0.875rem] font-bold text-white">
+              <span
+                aria-hidden="true"
+                className="grid size-9 shrink-0 place-items-center rounded-[0.5rem] bg-(--p-brand) font-heading text-[0.875rem] font-bold text-white"
+              >
                 {p.name.charAt(0).toUpperCase()}
               </span>
             )}
             <span className="truncate font-heading text-[1.0625rem] font-bold">{p.name}</span>
           </span>
-          <Link href={basePath || "/"} className="inline-flex shrink-0 items-center gap-1 text-[0.875rem] font-semibold text-(--p-accent) hover:underline">
+          <Link
+            href={basePath || "/"}
+            className="inline-flex shrink-0 items-center gap-1 text-[0.875rem] font-semibold text-(--p-accent) hover:underline"
+          >
             <Icon name="chevronLeft" size={15} /> {t("book_back_to_property")}
           </Link>
         </div>
@@ -309,7 +337,12 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                       !now && !done && "border-(--p-line) bg-(--p-card) text-(--p-muted)",
                     )}
                   >
-                    <span className={cn("grid size-6 place-items-center rounded-full text-[0.75rem]", now ? "bg-white/25" : done ? "bg-[#dcfce7]" : "bg-(--p-soft)")}>
+                    <span
+                      className={cn(
+                        "grid size-6 place-items-center rounded-full text-[0.75rem]",
+                        now ? "bg-white/25" : done ? "bg-[#dcfce7]" : "bg-(--p-soft)",
+                      )}
+                    >
                       {done ? <Icon name="check" size={13} /> : i + 1}
                     </span>
                     <span className={cn(!now && "sr-only sm:not-sr-only")}>{stepLabel[s]}</span>
@@ -385,11 +418,19 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                     role="status"
                     className={cn(
                       "mt-5 flex items-center gap-2 rounded-[0.75rem] px-4 py-3 text-[0.875rem] font-semibold",
-                      checking ? "bg-(--p-soft) text-(--p-muted)" : priced ? "bg-[#ecfdf3] text-[#166534]" : "bg-[#fff7ed] text-[#9a3412]",
+                      checking
+                        ? "bg-(--p-soft) text-(--p-muted)"
+                        : priced
+                          ? "bg-[#ecfdf3] text-[#166534]"
+                          : "bg-[#fff7ed] text-[#9a3412]",
                     )}
                   >
                     <Icon name={checking ? "refresh" : priced ? "check" : "alert"} size={16} />
-                    {checking ? t("book_checking") : priced ? t("book_available", { N: nights, UNIT: unitLabel(nights) }) : current?.error}
+                    {checking
+                      ? t("book_checking")
+                      : priced
+                        ? t("book_available", { N: nights, UNIT: unitLabel(nights) })
+                        : current?.error}
                   </p>
                 ) : null}
               </>
@@ -410,7 +451,13 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                       update({ extras });
                     };
                     return (
-                      <li key={extra.id} className={cn("flex flex-wrap items-center gap-3 rounded-[0.875rem] border bg-white p-4", on ? "border-(--p-accent) ring-2 ring-(--p-accent)/15" : "border-(--p-line)")}>
+                      <li
+                        key={extra.id}
+                        className={cn(
+                          "flex flex-wrap items-center gap-3 rounded-[0.875rem] border bg-white p-4",
+                          on ? "border-(--p-accent) ring-2 ring-(--p-accent)/15" : "border-(--p-line)",
+                        )}
+                      >
                         <div className="min-w-0 flex-1">
                           <p className="font-heading font-bold text-[#1f2937]">{extra.name}</p>
                           <p className="text-[0.8125rem] text-(--p-muted)">
@@ -418,12 +465,24 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                           </p>
                         </div>
                         {extra.required ? (
-                          <span className="rounded-full bg-(--p-soft) px-3 py-1 text-[0.8125rem] font-semibold">{t("book_included")}</span>
+                          <span className="rounded-full bg-(--p-soft) px-3 py-1 text-[0.8125rem] font-semibold">
+                            {t("book_included")}
+                          </span>
                         ) : extra.max > 1 ? (
                           <Counter value={qty} min={0} max={extra.max} onChange={setQty} />
                         ) : (
-                          <button type="button" onClick={() => setQty(on ? 0 : 1)} className={cn(on ? accentButton : ghostButton, "h-10 text-[0.875rem]")}>
-                            {on ? <><Icon name="check" size={15} /> {t("book_remove")}</> : t("book_add")}
+                          <button
+                            type="button"
+                            onClick={() => setQty(on ? 0 : 1)}
+                            className={cn(on ? accentButton : ghostButton, "h-10 text-[0.875rem]")}
+                          >
+                            {on ? (
+                              <>
+                                <Icon name="check" size={15} /> {t("book_remove")}
+                              </>
+                            ) : (
+                              t("book_add")
+                            )}
                           </button>
                         )}
                       </li>
@@ -432,11 +491,17 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                 </ul>
                 {setup.coupons ? (
                   <div className="mt-6">
-                    <label htmlFor="book-coupon" className={fieldLabel}>{t("book_coupon")}</label>
+                    <label htmlFor="book-coupon" className={fieldLabel}>
+                      {t("book_coupon")}
+                    </label>
                     <div className="flex gap-2">
                       <input
                         id="book-coupon"
-                        className={cn(inputClass, "min-w-0", couponError && "border-[#c2410c] focus:border-[#c2410c] focus:ring-[#c2410c]/20")}
+                        className={cn(
+                          inputClass,
+                          "min-w-0",
+                          couponError && "border-[#c2410c] focus:border-[#c2410c] focus:ring-[#c2410c]/20",
+                        )}
                         value={coupon}
                         onChange={(event) => {
                           setCoupon(event.target.value);
@@ -452,7 +517,11 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                         aria-invalid={couponError ? true : undefined}
                         aria-describedby={couponError ? "book-coupon-error" : undefined}
                       />
-                      <button type="button" className={cn(ghostButton, "h-12 shrink-0 px-4 sm:px-5")} onClick={applyCoupon}>
+                      <button
+                        type="button"
+                        className={cn(ghostButton, "h-12 shrink-0 px-4 sm:px-5")}
+                        onClick={applyCoupon}
+                      >
                         {t("front_apply_promo_code")}
                       </button>
                     </div>
@@ -460,7 +529,9 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                       <FieldError id="book-coupon-error">{couponError}</FieldError>
                     ) : request.promo_code && priced ? (
                       priced.promo_valid ? (
-                        <p className="mt-2 flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#15803d]"><Icon name="check" size={14} /> {t("book_coupon_applied")}</p>
+                        <p className="mt-2 flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#15803d]">
+                          <Icon name="check" size={14} /> {t("book_coupon_applied")}
+                        </p>
                       ) : (
                         <FieldError>{priced.promo_error || t("front_invalid_promo_code")}</FieldError>
                       )
@@ -489,12 +560,27 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                           {field.required ? <span className="text-[#c2410c]"> *</span> : null}
                         </label>
                         {field.type === "textarea" ? (
-                          <textarea id={id} rows={4} className={cn(inputClass, "h-auto py-3")} value={value} onChange={(e) => set(e.target.value)} aria-invalid={errors[field.name] ? true : undefined} />
+                          <textarea
+                            id={id}
+                            rows={4}
+                            className={cn(inputClass, "h-auto py-3")}
+                            value={value}
+                            onChange={(e) => set(e.target.value)}
+                            aria-invalid={errors[field.name] ? true : undefined}
+                          />
                         ) : field.type === "country" ? (
-                          <select id={id} className={inputClass} value={value} onChange={(e) => set(e.target.value)} aria-invalid={errors[field.name] ? true : undefined}>
+                          <select
+                            id={id}
+                            className={inputClass}
+                            value={value}
+                            onChange={(e) => set(e.target.value)}
+                            aria-invalid={errors[field.name] ? true : undefined}
+                          >
                             <option value="">—</option>
                             {setup.countries.map((c) => (
-                              <option key={c.id} value={c.id}>{c.name ?? c.id}</option>
+                              <option key={c.id} value={c.id}>
+                                {c.name ?? c.id}
+                              </option>
                             ))}
                           </select>
                         ) : (
@@ -504,7 +590,17 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                             className={inputClass}
                             value={value}
                             onChange={(e) => set(e.target.value)}
-                            autoComplete={{ c_name: "name", c_email: "email", c_phone: "tel", c_address: "street-address", c_city: "address-level2", c_state: "address-level1", c_zip: "postal-code" }[field.name]}
+                            autoComplete={
+                              {
+                                c_name: "name",
+                                c_email: "email",
+                                c_phone: "tel",
+                                c_address: "street-address",
+                                c_city: "address-level2",
+                                c_state: "address-level1",
+                                c_zip: "postal-code",
+                              }[field.name]
+                            }
                             aria-invalid={errors[field.name] ? true : undefined}
                           />
                         )}
@@ -522,21 +618,45 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                 {needsPayment ? (
                   <div role="radiogroup" aria-label={t("book_payment_method")} className="grid gap-3">
                     {setup.payment_methods.map((m) => (
-                      <label key={m.id} className={cn("flex cursor-pointer items-center gap-3 rounded-[0.875rem] border bg-white p-4", method === m.id ? "border-(--p-accent) ring-2 ring-(--p-accent)/15" : "border-(--p-line)")}>
-                        <input type="radio" name="payment_method" value={m.id} checked={method === m.id} onChange={() => setMethod(m.id)} className="size-4 accent-(--p-accent)" />
+                      <label
+                        key={m.id}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-[0.875rem] border bg-white p-4",
+                          method === m.id ? "border-(--p-accent) ring-2 ring-(--p-accent)/15" : "border-(--p-line)",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="payment_method"
+                          value={m.id}
+                          checked={method === m.id}
+                          onChange={() => setMethod(m.id)}
+                          className="size-4 accent-(--p-accent)"
+                        />
                         <span className="flex-1 font-heading font-bold text-[#1f2937]">{m.title}</span>
-                        {m.online ? <span className="flex items-center gap-1 text-[0.75rem] font-semibold text-(--p-muted)"><Icon name="lock" size={13} /> {t("book_secure")}</span> : null}
+                        {m.online ? (
+                          <span className="flex items-center gap-1 text-[0.75rem] font-semibold text-(--p-muted)">
+                            <Icon name="lock" size={13} /> {t("book_secure")}
+                          </span>
+                        ) : null}
                       </label>
                     ))}
                     {errors.payment_method ? <FieldError>{errors.payment_method}</FieldError> : null}
                   </div>
                 ) : (
-                  <p className="rounded-[0.75rem] bg-(--p-soft) px-4 py-3 text-[0.9375rem]">{t("book_no_payment_needed")}</p>
+                  <p className="rounded-[0.75rem] bg-(--p-soft) px-4 py-3 text-[0.9375rem]">
+                    {t("book_no_payment_needed")}
+                  </p>
                 )}
                 {setup.terms ? (
                   <div className="mt-5">
                     <label className="flex items-start gap-3 text-[0.9375rem]">
-                      <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-1 size-4 accent-(--p-accent)" />
+                      <input
+                        type="checkbox"
+                        checked={terms}
+                        onChange={(e) => setTerms(e.target.checked)}
+                        className="mt-1 size-4 accent-(--p-accent)"
+                      />
                       <span>
                         {termsText}
                         {setup.terms.required ? <span className="text-[#c2410c]"> *</span> : null}
@@ -544,7 +664,9 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
                     </label>
                     {setup.terms.body ? (
                       <details className="mt-2 text-[0.8125rem] text-(--p-muted)">
-                        <summary className="cursor-pointer font-semibold">{setup.terms.label.replace(/%s/g, "")}</summary>
+                        <summary className="cursor-pointer font-semibold">
+                          {setup.terms.label.replace(/%s/g, "")}
+                        </summary>
                         <p className="mt-2 whitespace-pre-line">{setup.terms.body}</p>
                       </details>
                     ) : null}
@@ -555,16 +677,28 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
             ) : null}
 
             {formError ? (
-              <p role="alert" className="mt-5 flex items-center gap-2 rounded-[0.75rem] bg-[#fff7ed] px-4 py-3 text-[0.875rem] font-semibold text-[#9a3412]">
+              <p
+                role="alert"
+                className="mt-5 flex items-center gap-2 rounded-[0.75rem] bg-[#fff7ed] px-4 py-3 text-[0.875rem] font-semibold text-[#9a3412]"
+              >
                 <Icon name="alert" size={16} /> {formError}
               </p>
             ) : null}
 
             <div className="mt-7 hidden items-center justify-between gap-3 lg:flex">
               {stepIndex > 0 ? (
-                <button type="button" onClick={back} className={cn(ghostButton, "h-12")}>{t("book_back")}</button>
-              ) : <span />}
-              <button type="button" onClick={primary.action} disabled={primary.disabled} className={cn(accentButton, "h-12")}>
+                <button type="button" onClick={back} className={cn(ghostButton, "h-12")}>
+                  {t("book_back")}
+                </button>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={primary.action}
+                disabled={primary.disabled}
+                className={cn(accentButton, "h-12")}
+              >
                 {primary.text}
               </button>
             </div>
@@ -589,8 +723,17 @@ function BookingSession({ setup, initial, basePath, onFinished }: FlowProps & { 
           )}
         </div>
         <div className="flex shrink-0 gap-2">
-          {stepIndex > 0 ? <button type="button" onClick={back} className={cn(ghostButton, "h-11 px-3")} aria-label={t("book_back")}><Icon name="chevronLeft" size={18} /></button> : null}
-          <button type="button" onClick={primary.action} disabled={primary.disabled} className={cn(accentButton, "h-11 px-4 text-[0.875rem]")}>
+          {stepIndex > 0 ? (
+            <button type="button" onClick={back} className={cn(ghostButton, "h-11 px-3")} aria-label={t("book_back")}>
+              <Icon name="chevronLeft" size={18} />
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={primary.action}
+            disabled={primary.disabled}
+            className={cn(accentButton, "h-11 px-4 text-[0.875rem]")}
+          >
             {primary.text}
           </button>
         </div>
@@ -610,6 +753,21 @@ function StepTitle({ title, desc }: { title: string; desc: string }) {
   );
 }
 
+/**
+ * Guests from the property page link, kept within the property's limits. Adults and children have separate
+ * maximums (max adults 2 = up to 2 adults plus up to "max children" children).
+ */
+function startGuests(
+  guests: BookingSetup["guests"],
+  adultsIn: number | undefined,
+  childrenIn: number | undefined,
+): { adults: number; children: number } {
+  const min = guests.adults.show ? (guests.adults.required ? 1 : 0) : 0;
+  const adults = guests.adults.show ? Math.min(guests.adults.max, Math.max(min, adultsIn ?? 1)) : 0;
+  const children = guests.children.show ? Math.min(guests.children.max, Math.max(0, childrenIn ?? 0)) : 0;
+  return { adults, children };
+}
+
 function FieldError({ children, id }: { children: ReactNode; id?: string }) {
   return (
     <p id={id} role="alert" className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#c2410c]">
@@ -622,7 +780,19 @@ function FieldError({ children, id }: { children: ReactNode; id?: string }) {
  * Check-in / check-out shown above the availability calendar. The dates are chosen on the calendar only
  * (no browser date picker on top of it): a click takes the guest to the calendar.
  */
-function DateField({ id, label, value, placeholder, error }: { id: string; label: string; value: string; placeholder: string; error: boolean }) {
+function DateField({
+  id,
+  label,
+  value,
+  placeholder,
+  error,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  placeholder: string;
+  error: boolean;
+}) {
   return (
     <div>
       <span id={`${id}-label`} className={fieldLabel}>
@@ -635,9 +805,16 @@ function DateField({ id, label, value, placeholder, error }: { id: string; label
         onClick={() => {
           const calendar = document.getElementById("book-calendar");
           calendar?.scrollIntoView({ behavior: "smooth", block: "center" });
-          calendar?.querySelector<HTMLButtonElement>("button[aria-label]:not(:disabled)")?.focus({ preventScroll: true });
+          calendar
+            ?.querySelector<HTMLButtonElement>("button[aria-label]:not(:disabled)")
+            ?.focus({ preventScroll: true });
         }}
-        className={cn(inputClass, "flex items-center justify-between gap-2 text-left", !value && "text-[#9ca3af]", error && "border-[#c2410c] ring-2 ring-[#c2410c]/20")}
+        className={cn(
+          inputClass,
+          "flex items-center justify-between gap-2 text-left",
+          !value && "text-[#9ca3af]",
+          error && "border-[#c2410c] ring-2 ring-[#c2410c]/20",
+        )}
       >
         <span className="truncate">{value || placeholder}</span>
         <Icon name="calendar" size={18} className="shrink-0 text-(--p-muted)" />
@@ -646,18 +823,47 @@ function DateField({ id, label, value, placeholder, error }: { id: string; label
   );
 }
 
-function Counter({ value, min, max, onChange }: { value: number; min: number; max: number; onChange: (v: number) => void }) {
-  const btn = "grid size-9 place-items-center rounded-full border border-(--p-line) bg-white text-[1.125rem] font-semibold disabled:opacity-40";
+function Counter({
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
+  const btn =
+    "grid size-9 place-items-center rounded-full border border-(--p-line) bg-white text-[1.125rem] font-semibold disabled:opacity-40";
   return (
     <div className="flex items-center gap-3">
-      <button type="button" className={btn} disabled={value <= min} onClick={() => onChange(value - 1)} aria-label="−">−</button>
+      <button type="button" className={btn} disabled={value <= min} onClick={() => onChange(value - 1)} aria-label="−">
+        −
+      </button>
       <span className="w-6 text-center font-semibold tabular-nums">{value}</span>
-      <button type="button" className={btn} disabled={value >= max} onClick={() => onChange(value + 1)} aria-label="+">+</button>
+      <button type="button" className={btn} disabled={value >= max} onClick={() => onChange(value + 1)} aria-label="+">
+        +
+      </button>
     </div>
   );
 }
 
-function CounterRow({ title, hint, value, min, max, onChange }: { title: string; hint: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
+function CounterRow({
+  title,
+  hint,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  title: string;
+  hint: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
   return (
     <div className="flex items-center justify-between gap-4 py-4">
       <div>
@@ -688,7 +894,13 @@ function Summary({
   const place = [p.city, p.state].filter(Boolean).join(", ");
   const guests = request.adults + request.children;
   const row = (labelText: string, amount: number, tone?: "minus" | "muted") => (
-    <div className={cn("flex justify-between gap-3 py-1.5 text-[0.875rem]", tone === "muted" && "text-(--p-muted)", tone === "minus" && "text-[#15803d]")}>
+    <div
+      className={cn(
+        "flex justify-between gap-3 py-1.5 text-[0.875rem]",
+        tone === "muted" && "text-(--p-muted)",
+        tone === "minus" && "text-[#15803d]",
+      )}
+    >
       <dt>{labelText}</dt>
       <dd className="tabular-nums">{tone === "minus" ? `− ${money(amount)}` : money(amount)}</dd>
     </div>
@@ -700,7 +912,11 @@ function Summary({
       </div>
       <h2 className="font-heading text-[1.0625rem] font-bold">{p.name}</h2>
       <p className="mt-0.5 text-[0.8125rem] text-(--p-muted)">
-        {[place, request.date_from && request.date_to ? `${fmtDay(request.date_from)} → ${fmtDay(request.date_to)}` : null, guests > 0 ? `${t("book_guests")}: ${guests}` : null]
+        {[
+          place,
+          request.date_from && request.date_to ? `${fmtDay(request.date_from)} → ${fmtDay(request.date_to)}` : null,
+          guests > 0 ? `${t("book_guests")}: ${guests}` : null,
+        ]
           .filter(Boolean)
           .join(" · ")}
       </p>
@@ -719,8 +935,12 @@ function Summary({
               </p>
             </>
           ) : null}
-          {quote.discount_valid && quote.discount_amount > 0 ? row(quote.discount_name || t("front_discount"), quote.discount_amount, "minus") : null}
-          {quote.promo_valid && quote.promo_amount > 0 ? row(`${t("book_coupon")} ${quote.promo_code}`, quote.promo_amount, "minus") : null}
+          {quote.discount_valid && quote.discount_amount > 0
+            ? row(quote.discount_name || t("front_discount"), quote.discount_amount, "minus")
+            : null}
+          {quote.promo_valid && quote.promo_amount > 0
+            ? row(`${t("book_coupon")} ${quote.promo_code}`, quote.promo_amount, "minus")
+            : null}
           {quote.tax > 0 ? row(t("bf_tax"), quote.tax, "muted") : null}
           {quote.tourist_tax > 0 ? row(t("bf_tourist_tax"), quote.tourist_tax, "muted") : null}
           <div className="mt-2 flex items-baseline justify-between border-t border-(--p-line) pt-3 font-heading">
@@ -730,19 +950,30 @@ function Summary({
           {quote.deposit > 0 || quote.security > 0 ? (
             <div className="mt-3 rounded-[0.75rem] bg-(--p-soft) px-3.5 py-2.5">
               {quote.deposit > 0 ? (
-                <div className="flex justify-between py-1 text-[0.875rem] font-bold"><dt>{t("book_pay_now")}</dt><dd className="tabular-nums">{money(quote.deposit)}</dd></div>
+                <div className="flex justify-between py-1 text-[0.875rem] font-bold">
+                  <dt>{t("book_pay_now")}</dt>
+                  <dd className="tabular-nums">{money(quote.deposit)}</dd>
+                </div>
               ) : null}
               {quote.on_arrival > 0 ? (
-                <div className="flex justify-between py-1 text-[0.8125rem] text-(--p-muted)"><dt>{t("book_pay_on_arrival")}</dt><dd className="tabular-nums">{money(quote.on_arrival)}</dd></div>
+                <div className="flex justify-between py-1 text-[0.8125rem] text-(--p-muted)">
+                  <dt>{t("book_pay_on_arrival")}</dt>
+                  <dd className="tabular-nums">{money(quote.on_arrival)}</dd>
+                </div>
               ) : null}
               {quote.security > 0 ? (
-                <div className="flex justify-between py-1 text-[0.8125rem] text-(--p-muted)"><dt>{t("book_security_refundable")}</dt><dd className="tabular-nums">{money(quote.security)}</dd></div>
+                <div className="flex justify-between py-1 text-[0.8125rem] text-(--p-muted)">
+                  <dt>{t("book_security_refundable")}</dt>
+                  <dd className="tabular-nums">{money(quote.security)}</dd>
+                </div>
               ) : null}
             </div>
           ) : null}
         </dl>
       ) : (
-        <p className="mt-4 border-t border-(--p-line) pt-3 text-[0.875rem] text-(--p-muted)">{t("book_choose_dates")}</p>
+        <p className="mt-4 border-t border-(--p-line) pt-3 text-[0.875rem] text-(--p-muted)">
+          {t("book_choose_dates")}
+        </p>
       )}
     </div>
   );

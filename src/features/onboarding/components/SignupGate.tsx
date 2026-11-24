@@ -19,10 +19,13 @@ function redirectFor(session: SignupSession, step: GateStep, editing: boolean): 
   if (state.status === "completed") {
     // A company added in the back office may have no property yet: nothing to preview.
     if (step === "preview" && !state.property) return LIVE_HREF;
+    // The theme can be changed any time after the sign-up (paid themes follow the active plan).
+    if (step === stepNumber("theme")) return null;
     return step === "live" || step === "preview" ? null : LIVE_HREF;
   }
   // The preview needs a property (step 2) to show.
-  if (step === "preview") return state.completed_steps >= stepNumber("property") ? null : hrefForNextStep(state.next_step);
+  if (step === "preview")
+    return state.completed_steps >= stepNumber("property") ? null : hrefForNextStep(state.next_step);
   if (step === "live") return hrefForNextStep(state.next_step);
   // Step 1 is done once: coming back to it (also /setup/account/edit) continues where the sign-up stopped.
   if (step === 1 && state.completed_steps >= 1) return hrefForNextStep(state.next_step);

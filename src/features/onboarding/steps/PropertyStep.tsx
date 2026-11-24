@@ -36,7 +36,17 @@ const typeOptions = PROPERTY_TYPES.map((value) => ({ value, label: PROPERTY_TYPE
 type AddressKey = "address_1" | "city" | "state" | "zip" | "country_id";
 type Errors = Partial<
   Record<
-    "name" | AddressKey | "ical_url" | "bedrooms" | "bathrooms" | "max_guests" | "price" | "currency" | "slug" | "property_type" | "amenities",
+    | "name"
+    | AddressKey
+    | "ical_url"
+    | "bedrooms"
+    | "bathrooms"
+    | "max_guests"
+    | "price"
+    | "currency"
+    | "slug"
+    | "property_type"
+    | "amenities",
     string
   >
 >;
@@ -119,7 +129,9 @@ export function PropertyStep() {
   // Currency: the host's choice, the saved one, or (first time) the currency of the property's country
   const countryCurrency = countries?.find((item) => item.id === countryId)?.currency ?? null;
   const suggestedCurrency =
-    !saved && countryCurrency && currencyData?.currencies.some((item) => item.code === countryCurrency) ? countryCurrency : null;
+    !saved && countryCurrency && currencyData?.currencies.some((item) => item.code === countryCurrency)
+      ? countryCurrency
+      : null;
   const currency = currencyChoice || saved?.currency || suggestedCurrency || state?.currency || property.currency;
   const currencySign = currencyData?.currencies.find((item) => item.code === currency)?.sign ?? currency;
   const priceFormat = currencyData?.format ?? state?.price_format ?? DEFAULT_PRICE_FORMAT;
@@ -169,7 +181,8 @@ export function PropertyStep() {
     const countryName = a.country_name?.toLowerCase();
     const country = countries?.find(
       (item) =>
-        (a.country_code && item.alpha_2 === a.country_code) || (countryName && item.name?.toLowerCase() === countryName),
+        (a.country_code && item.alpha_2 === a.country_code) ||
+        (countryName && item.name?.toLowerCase() === countryName),
     );
     const nextAddress = {
       address_1: a.line1 ?? "",
@@ -223,13 +236,17 @@ export function PropertyStep() {
       patch.price = null;
       missing.push("Price per night");
       if (listing.price)
-        notes.push(`Your Airbnb price is in ${listing.price.currency} and your account uses ${currency}: enter your ${currency} price.`);
+        notes.push(
+          `Your Airbnb price is in ${listing.price.currency} and your account uses ${currency}: enter your ${currency} price.`,
+        );
       else notes.push("Airbnb only shows prices for chosen dates: please enter your price per night.");
     }
 
     if (listing.description) filled.push("Description (shown in step 5)");
     if (listing.photos.length > 0)
-      notes.push(`${listing.photos.length} photo${listing.photos.length === 1 ? "" : "s"} found on Airbnb: you can add them in one click in the Photos step.`);
+      notes.push(
+        `${listing.photos.length} photo${listing.photos.length === 1 ? "" : "s"} found on Airbnb: you can add them in one click in the Photos step.`,
+      );
     if (already_connected) notes.push("This listing's Airbnb calendar is already connected to this property.");
     else notes.push("Add your Airbnb calendar link below so dates booked on Airbnb stay blocked.");
 
@@ -311,7 +328,7 @@ export function PropertyStep() {
         country_id: countryId,
         bedrooms: property.bedrooms ?? "",
         bathrooms: property.bathrooms ?? "",
-        ical_url: icalUrl.trim(),
+        ical_url: state?.ical_sync_allowed === false ? "" : icalUrl.trim(),
         price: priceText,
         currency,
         max_guests: property.maxGuests ?? "",
@@ -353,7 +370,9 @@ export function PropertyStep() {
         {importReview ? (
           <div id="import-review" tabIndex={-1} className="grid gap-3 focus-visible:outline-none">
             <Notice tone="success" role="status" title="Imported from Airbnb — please check the details below">
-              {importReview.filled.length > 0 ? <p className="mt-1">Filled in: {importReview.filled.join(", ")}.</p> : null}
+              {importReview.filled.length > 0 ? (
+                <p className="mt-1">Filled in: {importReview.filled.join(", ")}.</p>
+              ) : null}
               {importReview.missing.length > 0 ? (
                 <p className="mt-1">Not found on Airbnb, please add: {importReview.missing.join(", ")}.</p>
               ) : null}
@@ -552,7 +571,11 @@ export function PropertyStep() {
             }}
             error={errors.currency}
             disabled={!currencyData}
-            hint={!currencyChoice && suggestedCurrency === currency ? "Suggested for the property's country. Used for all your prices." : "Used for all your prices."}
+            hint={
+              !currencyChoice && suggestedCurrency === currency
+                ? "Suggested for the property's country. Used for all your prices."
+                : "Used for all your prices."
+            }
           >
             {!currencyData ? <option value={currency}>{currency}</option> : null}
             {currencyData?.currencies.map((item) => (
@@ -582,7 +605,9 @@ export function PropertyStep() {
             hint={
               Number(priceText) > 0
                 ? `Guests see: ${formatAdminPrice(Number(priceText), currencySign, priceFormat, currency)} per night.${
-                    saved?.price_varies ? " Your weekday rates differ; a new price here replaces them for every day." : ""
+                    saved?.price_varies
+                      ? " Your weekday rates differ; a new price here replaces them for every day."
+                      : ""
                   }`
                 : saved?.price_varies
                   ? "Your rates differ by weekday (set in your dashboard); the lowest is shown. A new price here replaces them for every day."
@@ -591,25 +616,28 @@ export function PropertyStep() {
           />
         </div>
 
-        <TextField
-          id="property-ical_url"
-          label={
-            <>
-              Airbnb calendar (iCal) link <span className="font-normal text-body">(optional)</span>
-            </>
-          }
-          type="url"
-          inputMode="url"
-          placeholder="https://www.airbnb.co.in/calendar/ical/12345678.ics?s=…"
-          prefix={<Icon name="link" size={16} className="text-primary" />}
-          value={icalUrl}
-          onChange={(event) => {
-            setIcalUrl(event.target.value);
-            clearError("ical_url");
-          }}
-          error={errors.ical_url}
-          hint="Blocks the dates already booked on Airbnb and keeps them in sync. On Airbnb: Listing > Availability > Connect calendars > Export calendar. Booking.com and Vrbo links work too."
-        />
+        {/* Airbnb / iCal sync is a plan feature: not offered when the plan lacks it */}
+        {state?.ical_sync_allowed !== false ? (
+          <TextField
+            id="property-ical_url"
+            label={
+              <>
+                Airbnb calendar (iCal) link <span className="font-normal text-body">(optional)</span>
+              </>
+            }
+            type="url"
+            inputMode="url"
+            placeholder="https://www.airbnb.co.in/calendar/ical/12345678.ics?s=…"
+            prefix={<Icon name="link" size={16} className="text-primary" />}
+            value={icalUrl}
+            onChange={(event) => {
+              setIcalUrl(event.target.value);
+              clearError("ical_url");
+            }}
+            error={errors.ical_url}
+            hint="Blocks the dates already booked on Airbnb and keeps them in sync. On Airbnb: Listing > Availability > Connect calendars > Export calendar. Booking.com and Vrbo links work too."
+          />
+        ) : null}
 
         <div className="rounded-input bg-surface-muted px-4 py-3">
           {editingSlug ? (
@@ -654,8 +682,8 @@ export function PropertyStep() {
         </div>
 
         <p className="text-caption text-muted">
-          Everything here is saved to your account, except the page link, which is kept in this browser for your
-          preview for now. New amenities are added to your amenity list in the dashboard.
+          Everything here is saved to your account, except the page link, which is kept in this browser for your preview
+          for now. New amenities are added to your amenity list in the dashboard.
         </p>
 
         <StepFooter

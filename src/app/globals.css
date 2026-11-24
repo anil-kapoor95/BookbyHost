@@ -116,3 +116,35 @@
 @utility opsz-96 {
   font-variation-settings: "opsz" 96;
 }
+
+/* Every clickable control shows the hand cursor (Tailwind's reset gives buttons the default arrow); disabled ones show "not allowed". */
+@layer base {
+  a[href],
+  button:not(:disabled),
+  [role="button"],
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="radio"],
+  [role="checkbox"],
+  [role="switch"],
+  summary,
+  select:not(:disabled),
+  label:has(input[type="checkbox"]:not(:disabled)),
+  label:has(input[type="radio"]:not(:disabled)),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="range"]:not(:disabled),
+  input[type="color"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}

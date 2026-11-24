@@ -42,15 +42,28 @@ export interface PropertyPageData {
   /** Text and link of the branding line (System Options > Visual & Branding). */
   branding_line?: { text: string; footer: string; url: string };
   /** Taken dates (bookings and imported calendars), "to" is the check-out day. */
-  booked: { from: string; to: string }[];
+  /** Taken dates ("to" = check-out day): pending booking, confirmed booking / imported calendar, or blocked by the host. */
+  booked: { from: string; to: string; status?: "pending" | "booked" | "unavailable" }[];
   /** Booking calendar of the back office (preview.php?cid=…). */
   booking_url: string;
   /** false: the host's plan has expired, the page takes no bookings (missing = bookable). */
   bookable?: boolean;
   /** Page texts (back office > Languages): the booking card keys and every site_* label ("{N}" style tokens). */
-  labels: { book_now: string; check_in: string; check_out: string; choose_dates: string; adults: string; children: string } & Record<string, string>;
+  labels: {
+    book_now: string;
+    check_in: string;
+    check_out: string;
+    choose_dates: string;
+    adults: string;
+    children: string;
+  } & Record<string, string>;
   /** Adults / children of the property's booking form. */
-  guests: { adults: { show: boolean; max: number }; children: { show: boolean; max: number } };
+  guests: {
+    adults: { show: boolean; max: number };
+    children: { show: boolean; max: number };
+    /** Not used any more: adults and children have separate maximums (always null). */
+    max_people?: number | null;
+  };
 }
 
 /**
@@ -62,7 +75,11 @@ export async function getPropertyPage(slug: string): Promise<PropertyPageData | 
   const body = new FormData();
   body.append("slug", slug);
   try {
-    const response = await fetch(`${API_URL}?action=pjActionGetPropertyPage`, { method: "POST", body, cache: "no-store" });
+    const response = await fetch(`${API_URL}?action=pjActionGetPropertyPage`, {
+      method: "POST",
+      body,
+      cache: "no-store",
+    });
     if (!response.ok) return null;
     const json = (await response.json()) as { status?: string; data?: PropertyPageData };
     return json.status === "OK" && json.data ? json.data : null;

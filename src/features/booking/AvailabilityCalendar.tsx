@@ -4,22 +4,46 @@ import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
-export type TakenRange = { from: string; to: string; status?: "pending" | "booked" };
-type Status = "pending" | "booked";
+export type TakenRange = { from: string; to: string; status?: "pending" | "booked" | "unavailable" };
+type Status = "pending" | "booked" | "unavailable";
+/** When ranges overlap, the strongest status is shown. */
+const RANK: Record<Status, number> = { pending: 1, booked: 2, unavailable: 3 };
+const LABEL: Record<Status, string> = {
+  pending: "book_cal_pending",
+  booked: "book_cal_booked",
+  unavailable: "book_cal_unavailable",
+};
 
 const DAY = 86_400_000;
-const addDays = (value: string, days: number) => new Date(Date.parse(`${value}T00:00:00Z`) + days * DAY).toISOString().slice(0, 10);
+const addDays = (value: string, days: number) =>
+  new Date(Date.parse(`${value}T00:00:00Z`) + days * DAY).toISOString().slice(0, 10);
 const iso = (y: number, m: number, d: number) => new Date(Date.UTC(y, m, d)).toISOString().slice(0, 10);
 const longDay = (value: string) =>
-  new Date(`${value}T00:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  new Date(`${value}T00:00:00Z`).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 
 // Colours of the day states (the selected stay uses the website's accent colour)
-const TONE: Record<"free" | Status, string> = { free: "#e7f4ea", pending: "#fbe3a6", booked: "#f5c2c0" };
-const INK: Record<"free" | Status, string> = { free: "#14532d", pending: "#854d0e", booked: "#991b1b" };
+const TONE: Record<"free" | Status, string> = {
+  free: "#e7f4ea",
+  pending: "#fbe3a6",
+  booked: "#f5c2c0",
+  unavailable: "#e2e2de",
+};
+const INK: Record<"free" | Status, string> = {
+  free: "#14532d",
+  pending: "#854d0e",
+  booked: "#991b1b",
+  unavailable: "#57534e",
+};
 
 /**
  * Availability calendar of the booking page: two months (one on phones), days coloured by the back office's
- * bookings (available / pending / booked / past). Per night, the check-in and check-out days of a booking are drawn
+ * bookings (available / pending / booked / unavailable / past). Per night, the check-in and check-out days of a booking are drawn
  * half and half, so a check-out day can still be a check-in day. First click: check-in, second: check-out.
  */
 export function AvailabilityCalendar({
@@ -48,17 +72,14 @@ export function AvailabilityCalendar({
   const [hover, setHover] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
 
-  /** Status of a night (per night: the night after the day) or of a day (per day). Booked wins over pending. */
+  /** Status of a night (per night: the night after the day) or of a day (per day). Unavailable > booked > pending. */
   const statusOf = useMemo(() => {
     const ranges = taken.map((r) => ({ ...r, status: (r.status ?? "booked") as Status }));
     return (day: string): Status | null => {
       let found: Status | null = null;
       for (const r of ranges) {
         const inside = perDay ? r.from <= day && day <= r.to : r.from <= day && day < r.to;
-        if (inside) {
-          if (r.status === "booked") return "booked";
-          found = "pending";
-        }
+        if (inside && (!found || RANK[r.status] > RANK[found])) found = r.status;
       }
       return found;
     };
@@ -100,10 +121,14 @@ export function AvailabilityCalendar({
     return { year: d.getUTCFullYear(), month: d.getUTCMonth() };
   });
   const firstMonth = months[0];
-  const atStart = firstMonth.year * 12 + firstMonth.month <= Number(today.slice(0, 4)) * 12 + Number(today.slice(5, 7)) - 1;
+  const atStart =
+    firstMonth.year * 12 + firstMonth.month <= Number(today.slice(0, 4)) * 12 + Number(today.slice(5, 7)) - 1;
 
   const weekdays = Array.from({ length: 7 }, (_, i) =>
-    new Date(Date.UTC(2024, 0, 7 + ((weekStart + i) % 7))).toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" }),
+    new Date(Date.UTC(2024, 0, 7 + ((weekStart + i) % 7))).toLocaleDateString("en-GB", {
+      weekday: "short",
+      timeZone: "UTC",
+    }),
   );
 
   const end = to || (pickingOut && hover && canCheckOut(hover) ? hover : "");
@@ -111,11 +136,17 @@ export function AvailabilityCalendar({
     { key: "book_cal_available", color: TONE.free },
     { key: "book_cal_pending", color: TONE.pending },
     { key: "book_cal_booked", color: TONE.booked },
+    { key: "book_cal_unavailable", color: TONE.unavailable },
     { key: "book_cal_past", color: "#f1f1ef" },
   ];
 
   return (
-    <div className={cn("rounded-[1rem] border bg-white p-3 sm:p-4", invalid ? "border-[#c2410c] ring-2 ring-[#c2410c]/15" : "border-(--p-line)")}>
+    <div
+      className={cn(
+        "rounded-[1rem] border bg-white p-3 sm:p-4",
+        invalid ? "border-[#c2410c] ring-2 ring-[#c2410c]/15" : "border-(--p-line)",
+      )}
+    >
       <div className="mb-3 flex items-center justify-between gap-2">
         <button
           type="button"
@@ -143,13 +174,20 @@ export function AvailabilityCalendar({
         {months.map(({ year, month }, mi) => {
           const days = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
           const lead = (new Date(Date.UTC(year, month, 1)).getUTCDay() - weekStart + 7) % 7;
-          const title = new Date(Date.UTC(year, month, 1)).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+          const title = new Date(Date.UTC(year, month, 1)).toLocaleDateString("en-GB", {
+            month: "long",
+            year: "numeric",
+            timeZone: "UTC",
+          });
           return (
             <div key={`${year}-${month}`} className={cn(mi === 1 && "hidden md:block")}>
               <p className="mb-2 text-center font-heading text-[0.9375rem] font-bold">{title}</p>
               <div className="grid grid-cols-7 gap-1 text-center" role="grid" aria-label={title}>
                 {weekdays.map((w) => (
-                  <span key={w} className="pb-1 text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-(--p-muted)">
+                  <span
+                    key={w}
+                    className="pb-1 text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-(--p-muted)"
+                  >
                     {w}
                   </span>
                 ))}
@@ -173,7 +211,10 @@ export function AvailabilityCalendar({
                     background = "#f1f1ef";
                     color = "#a8a29e";
                   } else if (night && before) {
-                    background = night === before ? TONE[night] : `linear-gradient(135deg, ${TONE[before]} 50%, ${TONE[night]} 50%)`;
+                    background =
+                      night === before
+                        ? TONE[night]
+                        : `linear-gradient(135deg, ${TONE[before]} 50%, ${TONE[night]} 50%)`;
                     color = INK[night];
                   } else if (night) {
                     background = `linear-gradient(135deg, ${TONE.free} 50%, ${TONE[night]} 50%)`;
@@ -182,7 +223,7 @@ export function AvailabilityCalendar({
                     background = `linear-gradient(135deg, ${TONE[before]} 50%, ${TONE.free} 50%)`;
                     color = INK.free;
                   }
-                  const state = past ? t("book_cal_past") : night ? t(night === "booked" ? "book_cal_booked" : "book_cal_pending") : t("book_cal_available");
+                  const state = past ? t("book_cal_past") : night ? t(LABEL[night]) : t("book_cal_available");
 
                   return (
                     <button
@@ -199,7 +240,13 @@ export function AvailabilityCalendar({
                         "relative grid aspect-square min-h-9 place-items-center rounded-[0.5rem] text-[0.875rem] font-semibold tabular-nums transition-[box-shadow,transform]",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--p-accent) focus-visible:ring-offset-1",
                         clickable ? "cursor-pointer hover:ring-2 hover:ring-(--p-accent)/60" : "cursor-not-allowed",
-                        night === "booked" && !past && !isFrom && !isTo && before === "booked" && "line-through decoration-1",
+                        night !== null &&
+                          night !== "pending" &&
+                          !past &&
+                          !isFrom &&
+                          !isTo &&
+                          before === night &&
+                          "line-through decoration-1",
                         (isFrom || isTo) && "bg-(--p-accent) text-white shadow-sm",
                         inRange && "ring-2 ring-inset ring-(--p-accent)",
                       )}

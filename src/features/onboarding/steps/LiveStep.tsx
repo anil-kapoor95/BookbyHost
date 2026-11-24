@@ -76,6 +76,8 @@ export function LiveStep() {
   const [syncOpen, setSyncOpen] = useState(false);
   const [calendarCount, setCalendarCount] = useState<number | null>(null);
   const savedCalendars = calendarCount ?? state?.property?.ical_urls?.length ?? 0;
+  // Airbnb / iCal sync is a plan feature (Pro and Business): Starter sees it locked, with the upgrade link
+  const syncLocked = state?.ical_sync_allowed === false;
   const [gatewayLoadError, setGatewayLoadError] = useState<string | null>(null);
 
   // Fill the popups with what is already saved for the property (also after a reload / on another device).
@@ -213,6 +215,12 @@ export function LiveStep() {
                   <Icon name="home" size={17} /> Explore my stays
                 </Button>
               ) : null}
+              <Link
+                href="/setup/theme"
+                className="rounded-sm font-semibold text-on-dark-muted underline underline-offset-4 hover:text-on-dark focus-visible:outline-none focus-visible:focus-ring"
+              >
+                Change theme
+              </Link>
               {loginUrl ? (
                 <a
                   href={loginUrl}
@@ -368,72 +376,91 @@ export function LiveStep() {
                 <StepNumber n={2} />
                 <div className="flex-1">
                   <h3 className="flex flex-wrap items-center gap-2 font-heading text-title">
-                    Connect your Airbnb calendar <Tag>Recommended</Tag>
+                    Connect your Airbnb calendar{" "}
+                    {syncLocked ? <Badge variant="solid">Pro</Badge> : <Tag>Recommended</Tag>}
                   </h3>
                   <p className="mt-1 text-small text-body">
                     Dates booked on Airbnb get blocked here automatically, and direct bookings block your Airbnb
                     calendar so you never get double bookings.
                   </p>
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 text-caption text-body">
-                      <span className="h-1.5 w-28 overflow-hidden rounded-pill bg-surface-sunken" aria-hidden="true">
-                        <span
-                          className={cn(
-                            "block h-full rounded-pill bg-primary-strong",
-                            savedCalendars > 0 ? "w-full" : "w-0",
-                          )}
-                        />
-                      </span>
-                      <span>
-                        {savedCalendars > 0 ? (
-                          <>
-                            <strong className="text-heading">{savedCalendars}</strong>{" "}
-                            {savedCalendars === 1 ? "calendar" : "calendars"} connected
-                          </>
-                        ) : (
-                          "No calendar connected yet"
-                        )}
-                      </span>
+                  {syncLocked ? (
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <p className="flex items-center gap-1.5 text-caption text-body">
+                        <Icon name="lock" size={12} /> Calendar sync is not included in your current plan.
+                      </p>
+                      <Button href="/pricing" variant="outline">
+                        Upgrade to sync calendars <Icon name="arrowRight" size={16} />
+                      </Button>
                     </div>
-                    <Link
-                      href="/pricing"
-                      className="flex items-center gap-1.5 rounded-sm text-caption font-semibold text-heading underline underline-offset-2 hover:text-link-hover"
-                    >
-                      <Icon name="lock" size={12} /> Add more calendars with Pro
-                    </Link>
-                  </div>
+                  ) : (
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 text-caption text-body">
+                        <span className="h-1.5 w-28 overflow-hidden rounded-pill bg-surface-sunken" aria-hidden="true">
+                          <span
+                            className={cn(
+                              "block h-full rounded-pill bg-primary-strong",
+                              savedCalendars > 0 ? "w-full" : "w-0",
+                            )}
+                          />
+                        </span>
+                        <span>
+                          {savedCalendars > 0 ? (
+                            <>
+                              <strong className="text-heading">{savedCalendars}</strong>{" "}
+                              {savedCalendars === 1 ? "calendar" : "calendars"} connected
+                            </>
+                          ) : (
+                            "No calendar connected yet"
+                          )}
+                        </span>
+                      </div>
+                      <Link
+                        href="/pricing"
+                        className="flex items-center gap-1.5 rounded-sm text-caption font-semibold text-heading underline underline-offset-2 hover:text-link-hover"
+                      >
+                        <Icon name="lock" size={12} /> Add more calendars with Pro
+                      </Link>
+                    </div>
+                  )}
                 </div>
-                <Button
-                  variant={savedCalendars > 0 ? "outline" : "primary"}
-                  onClick={() => setSyncOpen(true)}
-                  disabled={!hasProperty}
-                >
-                  <Icon name={savedCalendars > 0 ? "refresh" : "calendar"} size={16} />{" "}
-                  {savedCalendars > 0 ? "Manage sync" : "Sync Calendar"}
-                </Button>
+                {syncLocked ? null : (
+                  <Button
+                    variant={savedCalendars > 0 ? "outline" : "primary"}
+                    onClick={() => setSyncOpen(true)}
+                    disabled={!hasProperty}
+                  >
+                    <Icon name={savedCalendars > 0 ? "refresh" : "calendar"} size={16} />{" "}
+                    {savedCalendars > 0 ? "Manage sync" : "Sync Calendar"}
+                  </Button>
+                )}
               </div>
             </li>
 
-            <li
-              className="list-none rounded-card border border-primary-subtle bg-warning-soft p-5 sm:p-6"
-              aria-label="Custom domain"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex-1">
-                  <h3 className="flex items-center gap-2 font-heading text-title">
-                    <Badge variant="solid">Pro</Badge> Use your own custom domain
-                  </h3>
-                  <p className="mt-1 text-small text-body-strong">
-                    Upgrade <code className="rounded-sm bg-surface px-1.5 py-0.5 text-caption">{link}</code> into{" "}
-                    <strong className="text-heading">www.{slug.replace(/-/g, "")}.com</strong> with free SSL and unlock
-                    all 4 premium designer themes (Luxe, Homestay, Urban, Coastal).
-                  </p>
+            {/* Upgrade offer only for plans without "Your own domain" (a Pro / Business trial has it) */}
+            {state?.custom_domain_allowed ? null : (
+              <li
+                className="list-none rounded-card border border-primary-subtle bg-warning-soft p-5 sm:p-6"
+                aria-label="Custom domain"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="flex-1">
+                    <h3 className="flex items-center gap-2 font-heading text-title">
+                      <Badge variant="solid">Pro</Badge> Use your own custom domain
+                    </h3>
+                    <p className="mt-1 text-small text-body-strong">
+                      Upgrade <code className="rounded-sm bg-surface px-1.5 py-0.5 text-caption">{link}</code> into{" "}
+                      <strong className="text-heading">www.{slug.replace(/-/g, "")}.com</strong> with free SSL
+                      {state?.themes_allowed
+                        ? "."
+                        : " and unlock all 4 premium designer themes (Luxe, Homestay, Urban, Coastal)."}
+                    </p>
+                  </div>
+                  <Button href="/pricing" variant="outline" className="border-primary-subtle">
+                    Upgrade to Pro <Icon name="arrowRight" size={16} />
+                  </Button>
                 </div>
-                <Button href="/pricing" variant="outline" className="border-primary-subtle">
-                  Upgrade to Pro <Icon name="arrowRight" size={16} />
-                </Button>
-              </div>
-            </li>
+              </li>
+            )}
           </ol>
         </section>
 

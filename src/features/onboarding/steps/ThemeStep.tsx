@@ -42,7 +42,8 @@ export function ThemeStep() {
   useEffect(() => {
     let live = true;
     void signupApi.plans(token).then((result) => {
-      if (live && result.ok) setThemePlans(result.data.plans.filter((plan) => plan.includes_themes).map((plan) => plan.name));
+      if (live && result.ok)
+        setThemePlans(result.data.plans.filter((plan) => plan.includes_themes).map((plan) => plan.name));
     });
     return () => {
       live = false;
@@ -50,6 +51,8 @@ export function ThemeStep() {
   }, [token]);
 
   const name = state?.property?.name || "your property";
+  // After the sign-up this page changes the theme of the live page (no new registration).
+  const changing = state?.status === "completed";
   const draft = useDraft();
 
   // The host's own page for the previews.
@@ -62,7 +65,9 @@ export function ThemeStep() {
     const amenities = p?.amenities?.length
       ? p.amenities
       : [
-          ...AMENITIES.filter((amenity) => draft.property.amenities.includes(amenity.id)).map((amenity) => amenity.label),
+          ...AMENITIES.filter((amenity) => draft.property.amenities.includes(amenity.id)).map(
+            (amenity) => amenity.label,
+          ),
           ...draft.property.extraAmenities,
         ];
     const price = p?.price ?? draft.property.price;
@@ -70,7 +75,14 @@ export function ThemeStep() {
       name: p?.name || draft.property.name || "Your property",
       place: [p?.city, p?.state].filter(Boolean).join(", "),
       // As the back office shows prices (System options > Price format)
-      price: price ? formatAdminPrice(price, state?.currency_sign || currency, state?.price_format ?? DEFAULT_PRICE_FORMAT, currency) : null,
+      price: price
+        ? formatAdminPrice(
+            price,
+            state?.currency_sign || currency,
+            state?.price_format ?? DEFAULT_PRICE_FORMAT,
+            currency,
+          )
+        : null,
       facts: [
         bedrooms ? pluralize(bedrooms, "bedroom") : "",
         bathrooms ? pluralize(bathrooms, "bath") : "",
@@ -123,7 +135,11 @@ export function ThemeStep() {
     if (result.ok) {
       updateSignupState(result.data);
       // The host stays logged in on this browser (Log out in the header).
-      setSignupFlash({ tone: "success", text: "Registration complete — you're logged in to your BookbyHost account." });
+      setSignupFlash(
+        changing
+          ? { tone: "success", text: "Theme saved — your page uses it now." }
+          : { tone: "success", text: "Registration complete — you're logged in to your BookbyHost account." },
+      );
       router.push(LIVE_HREF);
       return;
     }
@@ -159,7 +175,8 @@ export function ThemeStep() {
           </p>
         </div>
         <Button size="lg" onClick={publish} disabled={publishing || !themes} aria-busy={publishing}>
-          {publishing ? "Publishing…" : "Publish my page"} <Icon name="arrowRight" size={18} />
+          {publishing ? (changing ? "Saving…" : "Publishing…") : changing ? "Save theme" : "Publish my page"}{" "}
+          <Icon name="arrowRight" size={18} />
         </Button>
       </div>
 
@@ -210,7 +227,6 @@ export function ThemeStep() {
         </div>
       )}
 
-
       <UpgradePlansDialog
         open={upgrade !== null}
         token={token}
@@ -254,7 +270,9 @@ function ThemeCard({
         <p className="flex min-w-0 items-center gap-1.5 font-heading text-base font-extrabold text-heading">
           <span className="truncate">{theme.name}</span>
           {theme.free ? (
-            <span className="shrink-0 rounded-sm bg-success-soft px-2 py-0.5 text-caption font-bold text-success-strong">Free</span>
+            <span className="shrink-0 rounded-sm bg-success-soft px-2 py-0.5 text-caption font-bold text-success-strong">
+              Free
+            </span>
           ) : theme.locked ? (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-sm bg-secondary px-2 py-0.5 text-caption font-bold text-on-dark">
               <Icon name="lock" size={11} strokeWidth={2.5} /> Pro

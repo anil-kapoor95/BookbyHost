@@ -177,12 +177,28 @@ export const bookingApi = {
       terms: terms ? "1" : "",
     }),
 
-  status: (slug: string, ref: string, key: string) => apiRequest<BookingStatus>("pjActionBookingStatus", { slug, ref, key }),
+  status: (slug: string, ref: string, key: string) =>
+    apiRequest<BookingStatus>("pjActionBookingStatus", { slug, ref, key }),
 };
 
 /** Text of the back office with {TOKEN}s filled in. */
-export function label(labels: Record<string, string>, key: string, tokens: Record<string, string | number> = {}): string {
-  let text = labels[key] ?? key;
+/** English texts of booking-page labels added later, used while a back office has not loaded them yet. */
+const DEFAULT_BOOKING_LABELS: Record<string, string> = {
+  book_cal_available: "Available",
+  book_cal_pending: "Pending",
+  book_cal_booked: "Booked",
+  book_cal_unavailable: "Unavailable",
+  book_cal_past: "Past",
+};
+
+/** Text of a label with its {TOKENS} filled in; a missing label (sent back as its own key) uses the English default. */
+export function label(
+  labels: Record<string, string>,
+  key: string,
+  tokens: Record<string, string | number> = {},
+): string {
+  const own = labels[key];
+  let text = own && own !== key ? own : (DEFAULT_BOOKING_LABELS[key] ?? key);
   for (const [token, value] of Object.entries(tokens)) text = text.split(`{${token}}`).join(String(value));
   return text;
 }
