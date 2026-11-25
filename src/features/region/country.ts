@@ -10,8 +10,8 @@ import type { PlanCurrency } from "@/lib/plan-display";
  * India pays in Indian rupees (INR ₹), every other country in US dollars (USD $) — the same rule as the back office
  * (Subscriptions > Settings > country currencies).
  *
- * First visit: detected (country of the visitor's connection when the hosting gives it — Vercel / Cloudflare /
- * CloudFront, see proxy.ts — else the browser's time zone, else its language). The visitor can change it at any
+ * First visit: detected (country of the visitor's connection when the hosting or CDN gives it — Cloudflare,
+ * CloudFront, Vercel, Netlify or your own proxy, see proxy.ts — else the browser's time zone, else its language). The visitor can change it at any
  * time (country selector in the header, on the plans and in the checkout); the choice is saved in this browser
  * (localStorage + a cookie) and used everywhere, in every tab.
  */

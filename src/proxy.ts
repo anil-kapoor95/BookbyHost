@@ -5,8 +5,8 @@ import { SITE_HEADERS } from "@/lib/site-headers";
 /**
  * 1. StayOwned website: a real 404 status for unknown example listings (/properties/<slug>), and the old
  *    property links /property/<slug>... redirected to the short link /<slug>...
- * 2. A host's own domain (www.myvilla.com, added in the back office: My company > Website address, and to the
- *    Vercel project of this website): the domain shows only that host's pages.
+ * 2. A host's own domain (www.myvilla.com, added in the back office: My company > Website address, and pointed to
+ *    wherever this website is hosted): the domain shows only that host's pages.
  *      one property:  /  -> /<property>,  /book -> /<property>/book,  /book/confirmed -> /<property>/book/confirmed
  *      several:       /  -> /stays/<company>,  /<property>[/book[/confirmed]] as on the StayOwned website
  *    Local test: http://www.myvilla.com.localhost:3000 (*.localhost always opens this computer).
@@ -14,6 +14,8 @@ import { SITE_HEADERS } from "@/lib/site-headers";
 const knownSlugs = new Set(properties.map((property) => property.slug));
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() || "";
+/** Extra request header with the visitor's country code (ISO alpha-2), set by your own proxy / CDN. */
+const GEO_HEADER = (process.env.GEO_COUNTRY_HEADER ?? "").trim().toLowerCase();
 
 /** First parts of the StayOwned website's own pages: never shown on a host's domain. */
 const MARKETING = new Set([
@@ -34,9 +36,19 @@ const MARKETING = new Set([
   "themes",
 ]);
 
-/** Hosts of the StayOwned website itself (NEXT_PUBLIC_SITE_URL, SITE_HOSTS, localhost, *.vercel.app). */
+/**
+ * Hosts of the website itself: NEXT_PUBLIC_SITE_URL, SITE_HOSTS (comma separated, e.g. a staging host or the
+ * hosting's own preview address) and localhost. "*.example.app" in SITE_HOSTS matches every subdomain of
+ * example.app (preview deployments of any hosting: *.vercel.app, *.netlify.app, *.onrender.com …).
+ */
+const siteHostList = [process.env.NEXT_PUBLIC_SITE_URL, ...(process.env.SITE_HOSTS ?? "").split(",")];
+const hostSuffixes = siteHostList
+  .map((value) => (value ?? "").trim().toLowerCase())
+  .filter((value) => value.startsWith("*."))
+  .map((value) => value.slice(1)); // ".example.app"
 const mainHosts = new Set(
-  [process.env.NEXT_PUBLIC_SITE_URL, ...(process.env.SITE_HOSTS ?? "").split(",")]
+  siteHostList
+    .filter((value) => !(value ?? "").trim().startsWith("*."))
     .map((value) =>
       (value ?? "")
         .trim()
@@ -53,8 +65,8 @@ function isMainHost(host: string) {
     host === "localhost" ||
     host === "127.0.0.1" ||
     host === "[::1]" ||
-    host.endsWith(".vercel.app") ||
-    mainHosts.has(host)
+    mainHosts.has(host) ||
+    hostSuffixes.some((suffix) => host.endsWith(suffix))
   );
 }
 
@@ -88,12 +100,21 @@ async function resolveDomain(host: string): Promise<Site | null> {
 }
 
 /**
- * Country of the visitor's connection, when the hosting tells it (Vercel, Cloudflare, CloudFront, or a proxy that
- * sets x-country-code): passed to the browser as the "so_geo" cookie, the first guess of the country selector
+ * Country of the visitor's connection, when the hosting tells it (Cloudflare, CloudFront, Vercel, Netlify, a proxy
+ * that sets x-country-code, or the header named in GEO_COUNTRY_HEADER): passed to the browser as the "so_geo"
+ * cookie, the first guess of the country selector
  * (features/region/country.ts). Nothing is set when no header is there (local development: time zone is used).
  */
 function withGeo(request: NextRequest, response: NextResponse) {
-  const geo = ["x-vercel-ip-country", "cf-ipcountry", "cloudfront-viewer-country", "x-country-code"]
+  const geo = [
+    GEO_HEADER,
+    "cf-ipcountry",
+    "cloudfront-viewer-country",
+    "x-vercel-ip-country",
+    "x-nf-geo-country",
+    "x-country-code",
+  ]
+    .filter(Boolean)
     .map((name) => (request.headers.get(name) ?? "").trim().toUpperCase())
     .find((value) => /^[A-Z]{2}$/.test(value) && value !== "XX" && value !== "T1");
   if (geo && request.cookies.get("so_geo")?.value !== geo) {
